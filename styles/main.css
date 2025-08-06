@@ -180,14 +180,16 @@ section h2 {
 
 .data-value pre {
     margin: 0;
-    white-space: pre-wrap;
+    white-space: pre-wrap; /* 改为pre-wrap以实现自适应换行 */
     background-color: #fff;
     padding: 0.5rem;
     border-radius: 3px;
-    max-height: 200px;
     overflow-y: auto;
     font-size: 12px;
     line-height: 1.4;
+    max-height: 200px;
+    word-break: break-word;
+    word-wrap: break-word;
 }
 
 /* Prompt拆分内容样式 */
@@ -226,9 +228,14 @@ section h2 {
     font-family: 'Courier New', Courier, monospace;
     font-size: 14px;
     line-height: 1.4;
-    max-height: 500px; /* 增加高度以显示更多内容 */
+    white-space: pre-wrap;
     overflow: auto;
-    white-space: pre;
+    word-break: break-word;
+    word-wrap: break-word;
+    resize: vertical;
+    min-height: 150px;
+    max-height: none; /* 移除最大高度限制 */
+    height: auto;
 }
 
 .code-block.java {
@@ -289,14 +296,9 @@ section h2 {
     transition: max-height 0.3s ease;
 }
 
-.json-content.collapsed {
-    max-height: 100px;
-    overflow: hidden;
-}
-
+.json-content.collapsed,
 .json-content.expanded {
-    max-height: 500px;
-    overflow-y: auto;
+    overflow: auto;
 }
 
 .json-content pre {
@@ -306,6 +308,7 @@ section h2 {
     font-size: 14px;
     line-height: 1.5;
     color: #333;
+    overflow: auto;
 }
 
 /* 表格样式 */
@@ -340,16 +343,21 @@ section h2 {
     background-color: #fff;
     padding: 0.5rem;
     border-radius: 3px;
-    max-height: 150px;
-    overflow-y: auto;
+    overflow: auto;
     font-size: 12px;
     line-height: 1.4;
+    resize: vertical; /* 允许垂直调整大小 */
+    min-height: 50px; /* 设置最小高度 */
 }
 
 .data-table .code-block {
-    max-height: 150px;
     font-size: 12px;
     padding: 0.5rem;
+    white-space: pre-wrap;
+    overflow: auto;
+    resize: vertical;
+    min-height: 80px;
+    max-height: none; /* 移除最大高度限制 */
 }
 
 .data-table .prompt-sections {
@@ -365,6 +373,8 @@ section h2 {
     padding: 0.25rem;
     font-size: 11px;
     max-height: 100px;
+    resize: vertical; /* 允许垂直调整大小 */
+    min-height: 40px; /* 设置最小高度 */
 }
 
 /* 分页控件样式 */
@@ -407,8 +417,7 @@ section h2 {
     border: 1px solid #dee2e6;
     border-radius: 4px;
     padding: 1rem;
-    max-height: 300px;
-    overflow-y: auto;
+    overflow: auto;
     font-family: 'Courier New', Courier, monospace;
     font-size: 12px;
 }

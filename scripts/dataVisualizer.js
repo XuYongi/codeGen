@@ -5,6 +5,154 @@ import { ExcelProcessor } from './excelProcessor.js';
  */
 export class DataVisualizer {
     /**
+     * 创建数据表格（只显示指定列）
+     * @param {Array} data - 要显示的数据
+     * @param {HTMLElement} container - 容器元素
+     */
+    static createTable(data, container) {
+        if (!container) {
+            console.error('容器元素未指定');
+            return;
+        }
+        
+        try {
+            // 清空容器
+            container.innerHTML = '';
+            
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p>没有数据可显示</p>';
+                return;
+            }
+            
+            // 创建表格元素
+            const table = document.createElement('table');
+            table.className = 'data-table';
+            
+            // 创建表头（只显示指定列）
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            
+            // 指定要显示的列
+            const displayColumns = [
+                'model_output',
+                'ide_codemate_model_feedback.accept_content',
+                'accept_type',
+                'prompt_sections'  // 拆分后的prompt字段
+            ];
+            
+            const displayColumnHeaders = [
+                'model_output',
+                'accept_content',
+                'accept_type',
+                'prompt 拆分内容'
+            ];
+            
+            displayColumnHeaders.forEach(headerText => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                headerRow.appendChild(th);
+            });
+            
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // 创建表体
+            const tbody = document.createElement('tbody');
+            
+            data.forEach((row, rowIndex) => {
+                const tr = document.createElement('tr');
+                
+                // 显示指定的列
+                displayColumns.forEach((column, index) => {
+                    const td = document.createElement('td');
+                    
+                    if (column === 'prompt_sections') {
+                        // 从extra_params中提取并拆分prompt字段
+                        const extraParamsStr = row['ide_codemate_model_request.extra_params'];
+                        console.log('表格模式 - extra_params内容:', extraParamsStr);
+                        
+                        if (extraParamsStr) {
+                            try {
+                                // 如果extra_params是JSON字符串，则解析并提取prompt
+                                if (typeof extraParamsStr === 'string' && 
+                                    (extraParamsStr.trim().startsWith('{') || extraParamsStr.trim().startsWith('['))) {
+                                    const extraParams = JSON.parse(extraParamsStr);
+                                    const promptValue = extraParams.prompt || '';
+                                    console.log('表格模式 - 解析出的prompt:', promptValue);
+                                    
+                                    // 拆分prompt内容
+                                    const sections = this.parsePromptSections(promptValue);
+                                    console.log('表格模式 - 拆分后的sections:', sections);
+                                    
+                                    // 创建展示容器
+                                    const sectionsContainer = document.createElement('div');
+                                    sectionsContainer.className = 'prompt-sections';
+                                    
+                                    // 检查是否有拆分内容
+                                    if (Object.keys(sections).length === 0) {
+                                        sectionsContainer.textContent = '无拆分内容';
+                                    } else {
+                                        // 为每个部分创建展示元素
+                                        Object.keys(sections).forEach(sectionKey => {
+                                            const sectionDiv = document.createElement('div');
+                                            sectionDiv.className = 'prompt-section';
+                                            
+                                            const sectionTitle = document.createElement('div');
+                                            sectionTitle.className = 'prompt-section-title';
+                                            sectionTitle.textContent = sectionKey;
+                                            
+                                            const sectionContent = document.createElement('pre');
+                                            sectionContent.className = 'code-block java';
+                                            sectionContent.style.maxHeight = '3000px'; // 限制最大高度
+                                            sectionContent.style.overflowY = 'auto';  // 添加垂直滚动条
+                                            sectionContent.style.whiteSpace = 'pre-wrap'; // 允许换行
+                                            sectionContent.style.wordWrap = 'break-word'; // 防止长单词溢出
+                                            // 保持原始格式，包括缩进
+                                            sectionContent.textContent = sections[sectionKey];
+                                            
+                                            sectionDiv.appendChild(sectionTitle);
+                                            sectionDiv.appendChild(sectionContent);
+                                            sectionsContainer.appendChild(sectionDiv);
+                                        });
+                                    }
+                                    
+                                    td.appendChild(sectionsContainer);
+                                } else {
+                                    td.textContent = extraParamsStr;
+                                }
+                            } catch (e) {
+                                // 解析失败则显示原始值
+                                console.warn('解析extra_params失败:', e);
+                                td.textContent = '解析失败: ' + extraParamsStr;
+                            }
+                        } else {
+                            td.textContent = '无数据';
+                        }
+                    } else {
+                        // 其他列直接显示值
+                        const cellValue = row[column];
+                        if (cellValue !== undefined && cellValue !== null) {
+                            td.textContent = cellValue;
+                        } else {
+                            td.textContent = '无数据';
+                        }
+                    }
+                    
+                    tr.appendChild(td);
+                });
+                
+                tbody.appendChild(tr);
+            });
+            
+            table.appendChild(tbody);
+            container.appendChild(table);
+        } catch (error) {
+            console.error('创建表格时出错:', error);
+            container.innerHTML = `<p class="error">创建表格时出错: ${error.message}</p>`;
+        }
+    }
+    
+    /**
      * 解析并拆分prompt内容
      * @param {string} promptText - 完整的prompt文本
      * @returns {Object} 拆分后的内容对象
@@ -105,135 +253,6 @@ export class DataVisualizer {
         
         return sections;
     }
-    /**
-     * 创建数据表格（只显示指定列）
-     * @param {Array} data - 要显示的数据
-     * @param {HTMLElement} container - 容器元素
-     */
-    static createTable(data, container) {
-        if (!container) {
-            console.error('容器元素未指定');
-            return;
-        }
-        
-        try {
-            // 清空容器
-            container.innerHTML = '';
-            
-            if (!data || data.length === 0) {
-                container.innerHTML = '<p>没有数据可显示</p>';
-                return;
-            }
-            
-            // 创建表格元素
-            const table = document.createElement('table');
-            table.className = 'data-table';
-            
-            // 创建表头（只显示指定列）
-            const thead = document.createElement('thead');
-            const headerRow = document.createElement('tr');
-            
-            // 指定要显示的列
-            const displayColumns = [
-                'model_output',
-                'ide_codemate_model_feedback.accept_content',
-                'accept_type',
-                'prompt_sections'  // 拆分后的prompt字段
-            ];
-            
-            const displayColumnHeaders = [
-                'model_output',
-                'accept_content',
-                'accept_type',
-                'prompt 拆分内容'
-            ];
-            
-            displayColumnHeaders.forEach(headerText => {
-                const th = document.createElement('th');
-                th.textContent = headerText;
-                headerRow.appendChild(th);
-            });
-            
-            thead.appendChild(headerRow);
-            table.appendChild(thead);
-            
-            // 创建表体
-            const tbody = document.createElement('tbody');
-            
-            data.forEach((row, rowIndex) => {
-                const tr = document.createElement('tr');
-                
-                // 显示指定的列
-                displayColumns.forEach((column, index) => {
-                    const td = document.createElement('td');
-                    
-                    if (column === 'prompt_sections') {
-                        // 从extra_params中提取并拆分prompt字段
-                        const extraParamsStr = row['ide_codemate_model_request.extra_params'];
-                        console.log('表格模式 - extra_params内容:', extraParamsStr);
-                        if (extraParamsStr) {
-                            try {
-                                // 如果extra_params是JSON字符串，则解析并提取prompt
-                                if (typeof extraParamsStr === 'string' && 
-                                    (extraParamsStr.trim().startsWith('{') || extraParamsStr.trim().startsWith('['))) {
-                                    const extraParams = JSON.parse(extraParamsStr);
-                                    const promptValue = extraParams.prompt || '';
-                                    // 拆分prompt内容
-                                    const sections = this.parsePromptSections(promptValue);
-                                    
-                                    // 创建展示容器
-                                    const sectionsContainer = document.createElement('div');
-                                    sectionsContainer.className = 'prompt-sections';
-                                    
-                                    // 为每个部分创建展示元素
-                                    Object.keys(sections).forEach(sectionKey => {
-                                        const sectionDiv = document.createElement('div');
-                                        sectionDiv.className = 'prompt-section';
-                                        
-                                        const sectionTitle = document.createElement('div');
-                                        sectionTitle.className = 'prompt-section-title';
-                                        sectionTitle.textContent = sectionKey;
-                                        
-                                        const sectionContent = document.createElement('pre');
-                                        sectionContent.className = 'code-block java';
-                                        sectionContent.textContent = sections[sectionKey];
-                                        
-                                        sectionDiv.appendChild(sectionTitle);
-                                        sectionDiv.appendChild(sectionContent);
-                                        sectionsContainer.appendChild(sectionDiv);
-                                    });
-                                    
-                                    td.appendChild(sectionsContainer);
-                                } else {
-                                    td.textContent = extraParamsStr;
-                                }
-                            } catch (e) {
-                                // 解析失败则显示原始值
-                                console.warn('解析extra_params失败:', e);
-                                td.textContent = extraParamsStr;
-                            }
-                        }
-                    } else {
-                        // 其他列直接显示值
-                        const cellValue = row[column];
-                        if (cellValue !== undefined && cellValue !== null) {
-                            td.textContent = cellValue;
-                        }
-                    }
-                    
-                    tr.appendChild(td);
-                });
-                
-                tbody.appendChild(tr);
-            });
-            
-            table.appendChild(tbody);
-            container.appendChild(table);
-        } catch (error) {
-            console.error('创建表格时出错:', error);
-            container.innerHTML = `<p class="error">创建表格时出错: ${error.message}</p>`;
-        }
-    }
     
     /**
      * 创建单条数据展示视图
@@ -272,11 +291,11 @@ export class DataVisualizer {
             const displayFields = [
                 { key: 'model_output', label: 'model_output' },
                 { key: 'ide_codemate_model_feedback.accept_content', label: 'accept_content' },
-                { key: 'accept_type', label: 'accept_type' },
-                { key: 'prompt_sections', label: 'prompt 拆分内容' }  // 拆分后的prompt
+                { key: 'accept_type', label: 'accept_type' }
+                // prompt部分单独处理，不放在这里
             ];
             
-            // 为每个字段创建展示项
+            // 为每个字段创建展示项（除了prompt）
             displayFields.forEach(field => {
                 const item = document.createElement('div');
                 item.className = 'data-item';
@@ -288,86 +307,15 @@ export class DataVisualizer {
                 const value = document.createElement('div');
                 value.className = 'data-value';
                 
-                let cellValue = '';
+                const cellValue = rowData[field.key];
                 
-                // 特殊处理拆分后的prompt字段
-                if (field.key === 'prompt_sections') {
-                    const extraParamsStr = rowData['ide_codemate_model_request.extra_params'];
-                    console.log('单条数据模式 - extra_params内容:', extraParamsStr);
-                    
-                    if (extraParamsStr) {
-                        try {
-                            // 如果extra_params是JSON字符串，则解析并提取prompt
-                            if (typeof extraParamsStr === 'string' && 
-                                (extraParamsStr.trim().startsWith('{') || extraParamsStr.trim().startsWith('['))) {
-                                const extraParams = JSON.parse(extraParamsStr);
-                                const promptValue = extraParams.prompt || '';
-                                console.log('单条数据模式 - 解析出的prompt:', promptValue);
-                                
-                                // 拆分prompt内容
-                                const sections = this.parsePromptSections(promptValue);
-                                console.log('单条数据模式 - 拆分后的sections:', sections);
-                                
-                                // 创建展示容器
-                                const sectionsContainer = document.createElement('div');
-                                sectionsContainer.className = 'prompt-sections';
-                                
-                                // 检查是否有拆分内容
-                                if (Object.keys(sections).length === 0) {
-                                    const noContent = document.createElement('div');
-                                    noContent.textContent = '无拆分内容';
-                                    sectionsContainer.appendChild(noContent);
-                                } else {
-                                    // 为每个部分创建展示元素
-                                    Object.keys(sections).forEach(sectionKey => {
-                                        const sectionDiv = document.createElement('div');
-                                        sectionDiv.className = 'prompt-section';
-                                        
-                                        const sectionTitle = document.createElement('div');
-                                        sectionTitle.className = 'prompt-section-title';
-                                        sectionTitle.textContent = sectionKey;
-                                        
-                                        const sectionContent = document.createElement('pre');
-                                        sectionContent.className = 'code-block java';
-                                        sectionContent.textContent = sections[sectionKey];
-                                        
-                                        sectionDiv.appendChild(sectionTitle);
-                                        sectionDiv.appendChild(sectionContent);
-                                        sectionsContainer.appendChild(sectionDiv);
-                                    });
-                                }
-                                
-                                value.appendChild(sectionsContainer);
-                            } else {
-                                const pre = document.createElement('pre');
-                                pre.className = 'code-block java';
-                                pre.textContent = '非JSON格式: ' + extraParamsStr || '';
-                                value.appendChild(pre);
-                            }
-                        } catch (e) {
-                            // 解析失败则显示原始值
-                            console.warn('解析extra_params失败:', e);
-                            const pre = document.createElement('pre');
-                            pre.className = 'code-block java';
-                            pre.textContent = '解析失败: ' + extraParamsStr || '';
-                            value.appendChild(pre);
-                        }
-                    } else {
-                        const noData = document.createElement('div');
-                        noData.textContent = '无数据';
-                        value.appendChild(noData);
-                    }
+                // 处理包含换行符的字段
+                if (typeof cellValue === 'string' && cellValue.includes('\n')) {
+                    value.innerHTML = cellValue.replace(/\n/g, '<br>');
+                } else if (cellValue !== undefined && cellValue !== null) {
+                    value.textContent = cellValue;
                 } else {
-                    const cellValue = rowData[field.key];
-                    
-                    // 处理包含换行符的字段
-                    if (typeof cellValue === 'string' && cellValue.includes('\n')) {
-                        value.innerHTML = cellValue.replace(/\n/g, '<br>');
-                    } else if (cellValue !== undefined && cellValue !== null) {
-                        value.textContent = cellValue;
-                    } else {
-                        value.textContent = '无数据';
-                    }
+                    value.textContent = '无数据';
                 }
                 
                 item.appendChild(label);
@@ -375,13 +323,100 @@ export class DataVisualizer {
                 dataList.appendChild(item);
             });
             
+            // 单独处理prompt部分，让它独占一列
+            const promptItem = document.createElement('div');
+            promptItem.className = 'data-item';
+            
+            const promptLabel = document.createElement('div');
+            promptLabel.className = 'data-label';
+            promptLabel.textContent = 'prompt 拆分内容';
+            
+            const promptValue = document.createElement('div');
+            promptValue.className = 'data-value';
+            
+            // 处理拆分后的prompt字段
+            const extraParamsStr = rowData['ide_codemate_model_request.extra_params'];
+            console.log('单条数据模式 - extra_params内容:', extraParamsStr);
+            
+            if (extraParamsStr) {
+                try {
+                    // 如果extra_params是JSON字符串，则解析并提取prompt
+                    if (typeof extraParamsStr === 'string' && 
+                        (extraParamsStr.trim().startsWith('{') || extraParamsStr.trim().startsWith('['))) {
+                        const extraParams = JSON.parse(extraParamsStr);
+                        const promptValueStr = extraParams.prompt || '';
+                        console.log('单条数据模式 - 解析出的prompt:', promptValueStr);
+                        
+                        // 拆分prompt内容
+                        const sections = this.parsePromptSections(promptValueStr);
+                        console.log('单条数据模式 - 拆分后的sections:', sections);
+                        
+                        // 创建展示容器
+                        const sectionsContainer = document.createElement('div');
+                        sectionsContainer.className = 'prompt-sections';
+                        
+                        // 检查是否有拆分内容
+                        if (Object.keys(sections).length === 0) {
+                            const noContent = document.createElement('div');
+                            noContent.textContent = '无拆分内容';
+                            sectionsContainer.appendChild(noContent);
+                        } else {
+                            // 为每个部分创建展示元素
+                            Object.keys(sections).forEach(sectionKey => {
+                                const sectionDiv = document.createElement('div');
+                                sectionDiv.className = 'prompt-section';
+                                
+                                const sectionTitle = document.createElement('div');
+                                sectionTitle.className = 'prompt-section-title';
+                                sectionTitle.textContent = sectionKey;
+                                
+                                const sectionContent = document.createElement('pre');
+                                sectionContent.className = 'code-block java';
+                                // 保持原始格式，包括缩进
+                                sectionContent.textContent = sections[sectionKey];
+                                
+                                sectionDiv.appendChild(sectionTitle);
+                                sectionDiv.appendChild(sectionContent);
+                                sectionsContainer.appendChild(sectionDiv);
+                            });
+                        }
+                        
+                        promptValue.appendChild(sectionsContainer);
+                    } else {
+                        const pre = document.createElement('pre');
+                        pre.className = 'code-block java';
+                        pre.style.maxHeight = '300px'; // 限制最大高度
+                        pre.style.overflowY = 'auto';  // 添加垂直滚动条
+                        pre.style.whiteSpace = 'pre-wrap'; // 允许换行
+                        pre.style.wordWrap = 'break-word'; // 防止长单词溢出
+                        pre.textContent = '非JSON格式: ' + extraParamsStr || '';
+                        promptValue.appendChild(pre);
+                    }
+                } catch (e) {
+                    // 解析失败则显示原始值
+                    console.warn('解析extra_params失败:', e);
+                    const pre = document.createElement('pre');
+                    pre.className = 'code-block java';
+                    pre.textContent = '解析失败: ' + extraParamsStr || '';
+                    promptValue.appendChild(pre);
+                }
+            } else {
+                const noData = document.createElement('div');
+                noData.textContent = '无数据';
+                promptValue.appendChild(noData);
+            }
+            
+            promptItem.appendChild(promptLabel);
+            promptItem.appendChild(promptValue);
+            dataList.appendChild(promptItem);
+            
             // 显示其他字段（包括原来的extra_params）
             const otherFieldsToggle = document.createElement('div');
             otherFieldsToggle.className = 'other-fields-toggle';
             
             const toggleButton = document.createElement('button');
             toggleButton.textContent = '显示其他字段';
-            toggleButton.onclick = () => this.toggleOtherFields(rowData, displayFields, dataList);
+            toggleButton.onclick = () => this.toggleOtherFields(rowData, [...displayFields, { key: 'prompt_sections', label: 'prompt 拆分内容' }], dataList);
             
             otherFieldsToggle.appendChild(toggleButton);
             dataView.appendChild(dataList);
@@ -405,7 +440,7 @@ export class DataVisualizer {
             const displayedKeys = displayedFields.map(f => f.key);
             
             // 查找未显示的字段（排除我们已经单独提取的字段）
-            const excludeKeys = ['prompt_sections', 'prompt 拆分内容']; // 不在"其他字段"中重复显示的字段
+            const excludeKeys = ['prompt_sections']; // 不在"其他字段"中重复显示的字段
             const otherFields = Object.keys(rowData)
                 .filter(key => !displayedKeys.includes(key) && !excludeKeys.includes(key) && key !== '_rowIndex')
                 .map(key => ({ key, label: key }));
@@ -545,17 +580,23 @@ export class DataVisualizer {
      */
     static toggleJsonView(contentElement) {
         try {
+            if (!contentElement) return;
+            
             const isExpanded = contentElement.classList.contains('expanded');
             const toggleButton = contentElement.parentElement.querySelector('.toggle-button');
             
             if (isExpanded) {
                 contentElement.classList.remove('expanded');
                 contentElement.classList.add('collapsed');
-                toggleButton.textContent = '展开';
+                if (toggleButton) {
+                    toggleButton.textContent = '展开';
+                }
             } else {
                 contentElement.classList.remove('collapsed');
                 contentElement.classList.add('expanded');
-                toggleButton.textContent = '折叠';
+                if (toggleButton) {
+                    toggleButton.textContent = '折叠';
+                }
             }
         } catch (error) {
             console.error('切换JSON视图时出错:', error);
@@ -591,7 +632,9 @@ export class DataVisualizer {
             const prevButton = document.createElement('button');
             prevButton.textContent = '上一条';
             prevButton.disabled = currentIndex <= 0;
-            prevButton.onclick = () => onPageChange(currentIndex - 1);
+            prevButton.onclick = () => {
+                if (onPageChange) onPageChange(currentIndex - 1);
+            };
             
             // 创建页码信息
             const pageInfo = document.createElement('span');
@@ -602,7 +645,9 @@ export class DataVisualizer {
             const nextButton = document.createElement('button');
             nextButton.textContent = '下一条';
             nextButton.disabled = currentIndex >= total - 1;
-            nextButton.onclick = () => onPageChange(currentIndex + 1);
+            nextButton.onclick = () => {
+                if (onPageChange) onPageChange(currentIndex + 1);
+            };
             
             pagination.appendChild(prevButton);
             pagination.appendChild(pageInfo);
@@ -649,7 +694,9 @@ export class DataVisualizer {
                 const button = document.createElement('button');
                 button.textContent = view.label;
                 button.className = currentView === view.id ? 'active' : '';
-                button.onclick = () => onViewChange(view.id);
+                button.onclick = () => {
+                    if (onViewChange) onViewChange(view.id);
+                };
                 viewControls.appendChild(button);
             });
             
@@ -711,13 +758,17 @@ export class DataVisualizer {
                 
                 // 获取该列的唯一值并添加到下拉框
                 try {
-                    const uniqueValues = ExcelProcessor.getColumnUniqueValues(data, header);
-                    uniqueValues.forEach(value => {
-                        const option = document.createElement('option');
-                        option.value = value;
-                        option.textContent = value;
-                        select.appendChild(option);
-                    });
+                    if (data && ExcelProcessor && typeof ExcelProcessor.getColumnUniqueValues === 'function') {
+                        const uniqueValues = ExcelProcessor.getColumnUniqueValues(data, header);
+                        if (uniqueValues && Array.isArray(uniqueValues)) {
+                            uniqueValues.forEach(value => {
+                                const option = document.createElement('option');
+                                option.value = value;
+                                option.textContent = value;
+                                select.appendChild(option);
+                            });
+                        }
+                    }
                 } catch (error) {
                     console.warn(`获取列 ${header} 的唯一值时出错:`, error);
                 }
