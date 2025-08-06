@@ -405,7 +405,7 @@ export class DataVisualizer {
             const displayedKeys = displayedFields.map(f => f.key);
             
             // 查找未显示的字段（排除我们已经单独提取的字段）
-            const excludeKeys = ['prompt_sections']; // 不在"其他字段"中重复显示的字段
+            const excludeKeys = ['prompt_sections', 'prompt 拆分内容']; // 不在"其他字段"中重复显示的字段
             const otherFields = Object.keys(rowData)
                 .filter(key => !displayedKeys.includes(key) && !excludeKeys.includes(key) && key !== '_rowIndex')
                 .map(key => ({ key, label: key }));
@@ -439,7 +439,6 @@ export class DataVisualizer {
                 const cellValue = rowData[field.key];
                 
                 // 特殊处理extra_params，以JSON格式展示
-                // 特殊处理extra_params，以JSON格式展示
                 if (field.key === 'ide_codemate_model_request.extra_params' && cellValue) {
                     try {
                         // 如果是字符串且看起来像JSON，则格式化显示
@@ -460,6 +459,8 @@ export class DataVisualizer {
                     value.innerHTML = cellValue.replace(/\n/g, '<br>');
                 } else if (cellValue !== undefined && cellValue !== null) {
                     value.textContent = cellValue;
+                } else {
+                    value.textContent = '无数据';
                 }
                 
                 item.appendChild(label);
