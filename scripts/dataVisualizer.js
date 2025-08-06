@@ -24,6 +24,15 @@ export class DataVisualizer {
                 return;
             }
             
+            // 限制显示的数据量以提高性能，只显示前100条
+            const displayData = data.slice(0, 100);
+            if (data.length > 100) {
+                const warning = document.createElement('div');
+                warning.className = 'warning';
+                warning.innerHTML = `<p>注意：数据量较大，仅显示前100条记录。总共 ${data.length} 条记录。</p>`;
+                container.appendChild(warning);
+            }
+            
             // 创建表格元素
             const table = document.createElement('table');
             table.className = 'data-table';
@@ -59,7 +68,7 @@ export class DataVisualizer {
             // 创建表体
             const tbody = document.createElement('tbody');
             
-            data.forEach((row, rowIndex) => {
+            displayData.forEach((row, rowIndex) => {
                 const tr = document.createElement('tr');
                 
                 // 显示指定的列
@@ -92,8 +101,11 @@ export class DataVisualizer {
                                     if (Object.keys(sections).length === 0) {
                                         sectionsContainer.textContent = '无拆分内容';
                                     } else {
-                                        // 为每个部分创建展示元素
-                                        Object.keys(sections).forEach(sectionKey => {
+                                        // 为每个部分创建展示元素，但限制显示的部分数量
+                                        const sectionKeys = Object.keys(sections);
+                                        const maxSections = 5; // 限制最多显示5个部分
+                                        
+                                        sectionKeys.slice(0, maxSections).forEach(sectionKey => {
                                             const sectionDiv = document.createElement('div');
                                             sectionDiv.className = 'prompt-section';
                                             
@@ -103,22 +115,36 @@ export class DataVisualizer {
                                             
                                             const sectionContent = document.createElement('pre');
                                             sectionContent.className = 'code-block java';
-                                            sectionContent.style.maxHeight = '3000px'; // 限制最大高度
-                                            sectionContent.style.overflowY = 'auto';  // 添加垂直滚动条
-                                            sectionContent.style.whiteSpace = 'pre-wrap'; // 允许换行
-                                            sectionContent.style.wordWrap = 'break-word'; // 防止长单词溢出
+                                            // 限制显示的字符数以提高性能
+                                            let content = sections[sectionKey];
+                                            if (content.length > 1000) {
+                                                content = content.substring(0, 1000) + '... (内容已截断)';
+                                            }
                                             // 保持原始格式，包括缩进
-                                            sectionContent.textContent = sections[sectionKey];
+                                            sectionContent.textContent = content;
                                             
                                             sectionDiv.appendChild(sectionTitle);
                                             sectionDiv.appendChild(sectionContent);
                                             sectionsContainer.appendChild(sectionDiv);
                                         });
+                                        
+                                        // 如果有更多部分，显示提示
+                                        if (sectionKeys.length > maxSections) {
+                                            const moreDiv = document.createElement('div');
+                                            moreDiv.className = 'more-sections';
+                                            moreDiv.textContent = `... 还有 ${sectionKeys.length - maxSections} 个部分`;
+                                            sectionsContainer.appendChild(moreDiv);
+                                        }
                                     }
                                     
                                     td.appendChild(sectionsContainer);
                                 } else {
-                                    td.textContent = extraParamsStr;
+                                    // 限制显示的字符数以提高性能
+                                    let displayText = extraParamsStr;
+                                    if (displayText && displayText.length > 70) {
+                                        displayText = displayText.substring(0, 70) + '...';
+                                    }
+                                    td.textContent = displayText;
                                 }
                             } catch (e) {
                                 // 解析失败则显示原始值
@@ -129,10 +155,14 @@ export class DataVisualizer {
                             td.textContent = '无数据';
                         }
                     } else {
-                        // 其他列直接显示值
+                        // 其他列直接显示值，但限制显示的字符数
                         const cellValue = row[column];
                         if (cellValue !== undefined && cellValue !== null) {
-                            td.textContent = cellValue;
+                            let displayText = cellValue.toString();
+                            if (displayText.length > 100) {
+                                displayText = displayText.substring(0, 100) + '...';
+                            }
+                            td.textContent = displayText;
                         } else {
                             td.textContent = '无数据';
                         }
@@ -215,8 +245,10 @@ export class DataVisualizer {
                     currentContent = [];
                     console.log('开始新部分:', currentSection);
                 } else if (currentSection) {
-                    // 添加内容到当前部分
-                    currentContent.push(line);
+                    // 添加内容到当前部分，但限制内容长度以提高性能
+                    if (currentContent.join('\n').length < 5000) {
+                        currentContent.push(line);
+                    }
                 }
             });
             
@@ -232,12 +264,15 @@ export class DataVisualizer {
                 // 尝试按段落拆分（以两个换行符为分隔）
                 const paragraphs = promptText.split('\n\n');
                 if (paragraphs.length > 1) {
-                    paragraphs.forEach((paragraph, index) => {
+                    // 限制段落数量以提高性能
+                    const maxParagraphs = 10;
+                    for (let i = 0; i < Math.min(paragraphs.length, maxParagraphs); i++) {
+                        const paragraph = paragraphs[i];
                         if (paragraph.trim()) {
-                            sections[`段落 ${index + 1}`] = paragraph.trim();
-                            console.log(`段落 ${index + 1}:`, sections[`段落 ${index + 1}`].substring(0, 100) + '...');
+                            sections[`段落 ${i + 1}`] = paragraph.trim();
+                            console.log(`段落 ${i + 1}:`, sections[`段落 ${i + 1}`].substring(0, 100) + '...');
                         }
-                    });
+                    }
                 } else {
                     // 如果还是无法拆分，则将整个内容作为一项
                     sections['完整内容'] = promptText;
@@ -309,11 +344,19 @@ export class DataVisualizer {
                 
                 const cellValue = rowData[field.key];
                 
-                // 处理包含换行符的字段
+                // 处理包含换行符的字段，但限制显示的字符数
                 if (typeof cellValue === 'string' && cellValue.includes('\n')) {
-                    value.innerHTML = cellValue.replace(/\n/g, '<br>');
+                    let displayText = cellValue;
+                    if (displayText.length > 1000) {
+                        displayText = displayText.substring(0, 1000) + '... (内容已截断)';
+                    }
+                    value.innerHTML = displayText.replace(/\n/g, '<br>');
                 } else if (cellValue !== undefined && cellValue !== null) {
-                    value.textContent = cellValue;
+                    let displayText = cellValue.toString();
+                    if (displayText.length > 1000) {
+                        displayText = displayText.substring(0, 1000) + '... (内容已截断)';
+                    }
+                    value.textContent = displayText;
                 } else {
                     value.textContent = '无数据';
                 }
@@ -385,10 +428,6 @@ export class DataVisualizer {
                     } else {
                         const pre = document.createElement('pre');
                         pre.className = 'code-block java';
-                        pre.style.maxHeight = '300px'; // 限制最大高度
-                        pre.style.overflowY = 'auto';  // 添加垂直滚动条
-                        pre.style.whiteSpace = 'pre-wrap'; // 允许换行
-                        pre.style.wordWrap = 'break-word'; // 防止长单词溢出
                         pre.textContent = '非JSON格式: ' + extraParamsStr || '';
                         promptValue.appendChild(pre);
                     }
@@ -482,18 +521,36 @@ export class DataVisualizer {
                             const parsed = JSON.parse(cellValue);
                             value.innerHTML = '<pre>' + JSON.stringify(parsed, null, 2) + '</pre>';
                         } else {
-                            // 否则直接显示
-                            value.textContent = cellValue;
+                            // 否则直接显示，但限制显示的字符数
+                            let displayText = cellValue.toString();
+                            if (displayText.length > 1000) {
+                                displayText = displayText.substring(0, 1000) + '... (内容已截断)';
+                            }
+                            value.textContent = displayText;
                         }
                     } catch (e) {
-                        // 解析失败则直接显示原始值
+                        // 解析失败则直接显示原始值，但限制显示的字符数
                         console.warn('解析extra_params失败:', e);
-                        value.textContent = cellValue;
+                        let displayText = cellValue.toString();
+                        if (displayText.length > 1000) {
+                            displayText = displayText.substring(0, 1000) + '... (内容已截断)';
+                        }
+                        value.textContent = displayText;
                     }
                 } else if (typeof cellValue === 'string' && cellValue.includes('\n')) {
-                    value.innerHTML = cellValue.replace(/\n/g, '<br>');
+                    // 处理包含换行符的字段，但限制显示的字符数
+                    let displayText = cellValue;
+                    if (displayText.length > 1000) {
+                        displayText = displayText.substring(0, 1000) + '... (内容已截断)';
+                    }
+                    value.innerHTML = displayText.replace(/\n/g, '<br>');
                 } else if (cellValue !== undefined && cellValue !== null) {
-                    value.textContent = cellValue;
+                    // 限制显示的字符数
+                    let displayText = cellValue.toString();
+                    if (displayText.length > 1000) {
+                        displayText = displayText.substring(0, 1000) + '... (内容已截断)';
+                    }
+                    value.textContent = displayText;
                 } else {
                     value.textContent = '无数据';
                 }
@@ -560,8 +617,11 @@ export class DataVisualizer {
             const jsonContent = document.createElement('div');
             jsonContent.className = 'json-content expanded';
             
-            // 格式化JSON数据
-            const formattedJson = JSON.stringify(rowData, null, 2);
+            // 格式化JSON数据，但限制长度以提高性能
+            let formattedJson = JSON.stringify(rowData, null, 2);
+            if (formattedJson.length > 50000) {
+                formattedJson = formattedJson.substring(0, 50000) + '\n\n... (JSON内容已截断)';
+            }
             const pre = document.createElement('pre');
             pre.textContent = formattedJson;
             jsonContent.appendChild(pre);
@@ -756,17 +816,29 @@ export class DataVisualizer {
                 defaultOption.textContent = `全部 ${header}`;
                 select.appendChild(defaultOption);
                 
-                // 获取该列的唯一值并添加到下拉框
+                // 获取该列的唯一值并添加到下拉框，但限制数量以提高性能
                 try {
                     if (data && ExcelProcessor && typeof ExcelProcessor.getColumnUniqueValues === 'function') {
                         const uniqueValues = ExcelProcessor.getColumnUniqueValues(data, header);
                         if (uniqueValues && Array.isArray(uniqueValues)) {
-                            uniqueValues.forEach(value => {
+                            // 限制下拉框选项数量以提高性能
+                            const maxOptions = 100;
+                            const displayValues = uniqueValues.slice(0, maxOptions);
+                            
+                            displayValues.forEach(value => {
                                 const option = document.createElement('option');
                                 option.value = value;
                                 option.textContent = value;
                                 select.appendChild(option);
                             });
+                            
+                            // 如果有更多选项，添加提示
+                            if (uniqueValues.length > maxOptions) {
+                                const moreOption = document.createElement('option');
+                                moreOption.disabled = true;
+                                moreOption.textContent = `... 还有 ${uniqueValues.length - maxOptions} 个选项`;
+                                select.appendChild(moreOption);
+                            }
                         }
                     }
                 } catch (error) {

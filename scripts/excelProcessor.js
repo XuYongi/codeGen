@@ -74,30 +74,39 @@ export class ExcelProcessor {
             // 处理表头
             const headers = data[0] || [];
             
-            // 处理数据行
-            const processedData = data.slice(1).map((row, index) => {
-                try {
-                    // 处理第六列(索引为5)的换行符
-                    if (row && row[5]) {
-                        // 将换行符统一为\n
-                        row[5] = row[5].toString().replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+            // 分批处理数据以提高性能
+            const batchSize = 1000; // 每批处理1000行
+            const processedData = [];
+            
+            // 分批处理数据行
+            for (let i = 1; i < data.length; i += batchSize) {
+                const batch = data.slice(i, Math.min(i + batchSize, data.length));
+                const processedBatch = batch.map((row, index) => {
+                    try {
+                        // 处理第六列(索引为5)的换行符
+                        if (row && row[5]) {
+                            // 将换行符统一为\n
+                            row[5] = row[5].toString().replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+                        }
+                        
+                        // 创建带有列名的对象
+                        const processedRow = {};
+                        headers.forEach((header, j) => {
+                            processedRow[header] = row && row[j] !== undefined ? row[j] : '';
+                        });
+                        
+                        // 添加行号（用于调试）
+                        processedRow._rowIndex = i + index + 1; // +1 因为索引从0开始，且跳过了表头
+                        
+                        return processedRow;
+                    } catch (error) {
+                        console.warn(`处理第${i + index + 1}行数据时出错:`, error);
+                        return {};
                     }
-                    
-                    // 创建带有列名的对象
-                    const processedRow = {};
-                    headers.forEach((header, i) => {
-                        processedRow[header] = row && row[i] !== undefined ? row[i] : '';
-                    });
-                    
-                    // 添加行号（用于调试）
-                    processedRow._rowIndex = index + 2; // +2 因为索引从0开始，且跳过了表头
-                    
-                    return processedRow;
-                } catch (error) {
-                    console.warn(`处理第${index + 2}行数据时出错:`, error);
-                    return {};
-                }
-            }).filter(row => row && Object.keys(row).length > 0); // 过滤掉空行
+                }).filter(row => row && Object.keys(row).length > 0); // 过滤掉空行
+                
+                processedData.push(...processedBatch);
+            }
             
             return {
                 headers: headers,
@@ -167,15 +176,19 @@ export class ExcelProcessor {
                 return [];
             }
             
-            const values = data.map(row => {
-                if (row && row[columnName] !== undefined && row[columnName] !== null) {
-                    return row[columnName];
-                }
-                return '';
-            }).filter(value => value !== '');
+            // 限制只取前1000个唯一值以提高性能
+            const maxUniqueValues = 1000;
+            const values = new Set();
             
-            // 去重并排序
-            return [...new Set(values)].sort();
+            for (let i = 0; i < data.length && values.size < maxUniqueValues; i++) {
+                const row = data[i];
+                if (row && row[columnName] !== undefined && row[columnName] !== null) {
+                    values.add(row[columnName]);
+                }
+            }
+            
+            // 转换为数组并排序
+            return Array.from(values).sort();
         } catch (error) {
             console.error(`获取列 ${columnName} 的唯一值时出错:`, error);
             return [];

@@ -56,6 +56,13 @@ function showDebugInfo(message) {
   console.log(message);
 }
 
+// 显示加载状态的函数
+function showLoadingStatus(message) {
+  if (dataContainer) {
+    dataContainer.innerHTML = `<p>⏳ ${message}</p>`;
+  }
+}
+
 // 初始化应用
 function initializeApp() {
   showDebugInfo('开始初始化应用');
@@ -110,10 +117,7 @@ async function handleFileSelect(event) {
     }
     
     // 显示加载状态
-    if (dataContainer) {
-      dataContainer.innerHTML = '<p>正在处理文件...</p>';
-    }
-    
+    showLoadingStatus('正在读取Excel文件...');
     if (dataSection) {
       dataSection.classList.remove('hidden');
     }
@@ -124,6 +128,7 @@ async function handleFileSelect(event) {
     showDebugInfo(`原始数据读取完成，数据行数: ${rawData ? rawData.length : 0}`);
     
     // 处理数据
+    showLoadingStatus('正在处理数据...');
     showDebugInfo('开始处理数据');
     const processedData = ExcelProcessor.processData(rawData);
     showDebugInfo(`数据处理完成，处理后的数据条数: ${processedData.data ? processedData.data.length : 0}`);
@@ -139,6 +144,7 @@ async function handleFileSelect(event) {
     
     // 显示筛选控件
     if (filterControls && originalData && headers) {
+      showLoadingStatus('正在创建筛选控件...');
       showDebugInfo('创建筛选控件');
       DataVisualizer.createFilterControls(
         headers, 
@@ -154,6 +160,7 @@ async function handleFileSelect(event) {
     
     // 显示视图控制
     if (viewControls) {
+      showLoadingStatus('正在创建视图控制...');
       showDebugInfo('创建视图控制');
       DataVisualizer.createViewControls(
         currentView,
@@ -167,6 +174,7 @@ async function handleFileSelect(event) {
     }
     
     // 显示数据
+    showLoadingStatus('正在显示数据...');
     showDebugInfo('显示数据信息');
     displayDataInfo();
     showDebugInfo('显示当前数据');
@@ -195,6 +203,9 @@ function handleFilterChange(filters) {
       showDebugInfo('错误: ExcelProcessor模块未加载');
       return;
     }
+    
+    // 显示加载状态
+    showLoadingStatus('正在筛选数据...');
     
     // 应用筛选
     if (originalData) {
@@ -233,6 +244,9 @@ function handleViewChange(view) {
     }
     
     currentView = view;
+    
+    // 显示加载状态
+    showLoadingStatus('正在切换视图...');
     
     // 更新视图控制按钮状态
     if (viewControls) {
@@ -292,6 +306,7 @@ function displayCurrentData() {
     showDebugInfo(`当前行数据键数: ${rowData ? Object.keys(rowData).length : 0}`);
     
     // 根据当前视图显示数据
+    showLoadingStatus('正在显示数据...');
     showDebugInfo(`准备显示视图: ${currentView}`);
     switch (currentView) {
       case 'single':
@@ -305,7 +320,7 @@ function displayCurrentData() {
       case 'table':
         showDebugInfo('调用createTable');
         // 仅显示当前行的表格
-        DataVisualizer.createTable([rowData], dataContainer);
+        DataVisualizer.createTable(currentData, dataContainer);
         break;
       default:
         showDebugInfo('调用默认createSingleDataView');

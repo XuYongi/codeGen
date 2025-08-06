@@ -296,9 +296,13 @@ section h2 {
     transition: max-height 0.3s ease;
 }
 
-.json-content.collapsed,
+.json-content.collapsed {
+    max-height: 100px;
+    overflow: hidden;
+}
+
 .json-content.expanded {
-    overflow: auto;
+    overflow-y: auto;
 }
 
 .json-content pre {
@@ -308,7 +312,6 @@ section h2 {
     font-size: 14px;
     line-height: 1.5;
     color: #333;
-    overflow: auto;
 }
 
 /* 表格样式 */
@@ -417,7 +420,8 @@ section h2 {
     border: 1px solid #dee2e6;
     border-radius: 4px;
     padding: 1rem;
-    overflow: auto;
+    max-height: 300px;
+    overflow-y: auto;
     font-family: 'Courier New', Courier, monospace;
     font-size: 12px;
 }
@@ -436,6 +440,18 @@ section h2 {
     border: 1px solid #f5c6cb;
     border-radius: 4px;
     margin: 1rem 0;
+}
+
+/* 加载状态样式 */
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+}
+
+.loading::before {
+    content: "⏳ ";
+    margin-right: 0.5rem;
 }
 
 /* 隐藏类 */
