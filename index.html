@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel数据可视化</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <header>
+        <h1>Excel数据可视化工具</h1>
+    </header>
+    
+    <main>
+        <section id="upload-section">
+            <h2>上传Excel文件</h2>
+            <div class="upload-area">
+                <input type="file" id="file-input" accept=".xlsx, .xls">
+                <label for="file-input" class="file-label">
+                    选择Excel文件
+                </label>
+                <p>支持 .xlsx 和 .xls 格式</p>
+            </div>
+        </section>
+        
+        <section id="filter-section" class="hidden">
+            <h2>数据筛选</h2>
+            <div id="filter-controls"></div>
+        </section>
+        
+        <section id="view-section" class="hidden">
+            <h2>视图控制</h2>
+            <div id="view-controls"></div>
+        </section>
+        
+        <section id="data-section" class="hidden">
+            <h2>数据展示</h2>
+            <div id="data-info"></div>
+            <div id="pagination-controls"></div>
+            <div id="data-container"></div>
+        </section>
+        
+        <section id="debug-section" class="hidden">
+            <h2>调试信息</h2>
+            <div id="debug-info"></div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>&copy; 2023 Excel数据可视化工具. 保留所有权利。</p>
+    </footer>
+    
+    <script src="scripts/main.js" type="module"></script>
+</body>
+</html>

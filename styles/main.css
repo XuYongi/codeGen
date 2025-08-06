@@ -1,0 +1,468 @@
+/* 全局样式重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f4f4f4;
+}
+
+/* 头部样式 */
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+/* 主体内容样式 */
+main {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 20px auto;
+}
+
+section {
+    background-color: #fff;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+section h2 {
+    color: #333;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+/* 上传区域样式 */
+.upload-area {
+    text-align: center;
+    padding: 2rem;
+    border: 2px dashed #ccc;
+    border-radius: 5px;
+}
+
+#file-input {
+    display: none;
+}
+
+.file-label {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.file-label:hover {
+    background-color: #0056b3;
+}
+
+/* 筛选控件样式 */
+.filter-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group label {
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.filter-group select,
+.filter-group input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.filter-group input.custom-input {
+    margin-top: 0.5rem;
+}
+
+/* 视图控制样式 */
+.view-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+}
+
+.view-controls h3 {
+    margin: 0;
+}
+
+.view-controls button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.view-controls button:hover {
+    background-color: #f5f5f5;
+}
+
+.view-controls button.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+/* 单条数据展示样式 */
+.single-data-view h3 {
+    margin-bottom: 1rem;
+}
+
+.single-data-view h4 {
+    margin: 1rem 0 0.5rem 0;
+    color: #495057;
+}
+
+.data-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+/* Prompt独占一列的样式 */
+.data-item.prompt-section-container {
+    grid-column: span 2;
+}
+
+@media (max-width: 768px) {
+    .data-item.prompt-section-container {
+        grid-column: span 1;
+    }
+}
+
+.data-item {
+    border: 1px solid #eee;
+    border-radius: 5px;
+    padding: 1rem;
+    background-color: #f8f9fa;
+}
+
+.data-label {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.data-value {
+    color: #212529;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.data-value pre {
+    margin: 0;
+    white-space: pre-wrap;
+    background-color: #fff;
+    padding: 0.5rem;
+    border-radius: 3px;
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+/* Prompt拆分内容样式 */
+.prompt-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.prompt-section {
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.prompt-section-title {
+    background-color: #e9ecef;
+    padding: 0.5rem;
+    font-weight: bold;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.prompt-section pre {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+}
+
+/* 代码块样式 */
+.code-block {
+    margin: 0;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 1.4;
+    max-height: 500px; /* 增加高度以显示更多内容 */
+    overflow: auto;
+    white-space: pre;
+}
+
+.code-block.java {
+    background-color: #f8f9fa;
+    border-left: 3px solid #007bff;
+}
+
+/* 其他字段切换按钮 */
+.other-fields-toggle {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.other-fields-toggle button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.other-fields-toggle button:hover {
+    background-color: #f5f5f5;
+}
+
+/* JSON视图样式 */
+.json-view {
+    border: 1px solid #eee;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.json-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #eee;
+}
+
+.json-header h3 {
+    margin: 0;
+}
+
+.toggle-button {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.json-content {
+    padding: 1rem;
+    background-color: #f8f9fa;
+    transition: max-height 0.3s ease;
+}
+
+.json-content.collapsed {
+    max-height: 100px;
+    overflow: hidden;
+}
+
+.json-content.expanded {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.json-content pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+}
+
+/* 表格样式 */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.data-table th,
+.data-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    vertical-align: top;
+}
+
+.data-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+}
+
+.data-table tr:hover {
+    background-color: #f5f5f5;
+}
+
+.data-table pre {
+    margin: 0;
+    white-space: pre-wrap;
+    background-color: #fff;
+    padding: 0.5rem;
+    border-radius: 3px;
+    max-height: 150px;
+    overflow-y: auto;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.data-table .code-block {
+    max-height: 150px;
+    font-size: 12px;
+    padding: 0.5rem;
+}
+
+.data-table .prompt-sections {
+    gap: 0.5rem;
+}
+
+.data-table .prompt-section-title {
+    padding: 0.25rem;
+    font-size: 12px;
+}
+
+.data-table .prompt-section pre {
+    padding: 0.25rem;
+    font-size: 11px;
+    max-height: 100px;
+}
+
+/* 分页控件样式 */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.pagination button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-info {
+    font-weight: bold;
+}
+
+/* 数据信息样式 */
+#data-info {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: #e9ecef;
+    border-radius: 5px;
+}
+
+/* 调试信息样式 */
+#debug-info {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+}
+
+#debug-info p {
+    margin: 0.25rem 0;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+/* 错误提示样式 */
+.error {
+    color: #dc3545;
+    padding: 1rem;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    margin: 1rem 0;
+}
+
+/* 隐藏类 */
+.hidden {
+    display: none;
+}
+
+/* 底部样式 */
+footer {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 1rem 0;
+    margin-top: 2rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    main {
+        padding: 1rem;
+    }
+    
+    section {
+        padding: 1rem;
+    }
+    
+    .filter-container,
+    .data-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .view-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .data-table .prompt-sections {
+        flex-direction: column;
+    }
+}
