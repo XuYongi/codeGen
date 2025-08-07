@@ -36,6 +36,7 @@ function checkModulesLoaded() {
 let fileInput, filterSection, viewSection, dataSection, filterControls, 
     viewControls, paginationControls, dataContainer, dataInfo, debugSection, debugInfo;
 let saveButton, saveToOriginalButton; // 添加保存按钮引用
+let filterToggle, toggleFilterButton; // 筛选项折叠相关元素
 
 // 全局变量
 let originalData = [];
@@ -45,6 +46,7 @@ let currentIndex = 0;
 let currentView = 'single'; // 'single', 'json', 'table'
 let originalFile = null; // 保存原始文件引用
 let workbookData = null; // 保存工作簿数据
+let isFilterExpanded = false; // 筛选项是否展开
 
 // 显示调试信息的函数
 function showDebugInfo(message) {
@@ -82,6 +84,8 @@ function initializeApp() {
   dataInfo = document.getElementById('data-info');
   debugSection = document.getElementById('debug-section');
   debugInfo = document.getElementById('debug-info');
+  filterToggle = document.getElementById('filter-toggle');
+  toggleFilterButton = document.getElementById('toggle-filter-button');
   
   // 检查DOM元素是否存在
   if (!fileInput) {
@@ -93,6 +97,11 @@ function initializeApp() {
   
   // 绑定事件监听器
   fileInput.addEventListener('change', handleFileSelect);
+  
+  // 绑定筛选项折叠按钮事件
+  if (toggleFilterButton) {
+    toggleFilterButton.addEventListener('click', toggleFilterDisplay);
+  }
   
   showDebugInfo('应用初始化完成');
 }
@@ -126,6 +135,12 @@ async function handleFileSelect(event) {
     showLoadingStatus('正在读取Excel文件...');
     if (dataSection) {
       dataSection.classList.remove('hidden');
+    }
+    
+    // 隐藏上传区域
+    const uploadSection = document.getElementById('upload-section');
+    if (uploadSection) {
+      uploadSection.classList.add('hidden');
     }
     
     showDebugInfo('开始读取Excel文件');
@@ -167,6 +182,9 @@ async function handleFileSelect(event) {
         filterControls, 
         handleFilterChange
       );
+      
+      // 初始化筛选控件折叠功能
+      initializeFilterCollapse();
     }
     
     if (filterSection) {
@@ -209,6 +227,56 @@ async function handleFileSelect(event) {
                                  '<p>详细错误信息已在调试区域显示</p>';
     }
   }
+}
+
+// 初始化筛选控件折叠功能
+function initializeFilterCollapse() {
+  if (!filterControls) return;
+  
+  const filterGroups = filterControls.querySelectorAll('.filter-group');
+  if (filterGroups.length > 5) { // 如果筛选项超过5个，则启用折叠功能
+    // 隐藏除前5个以外的筛选项
+    for (let i = 5; i < filterGroups.length; i++) {
+      filterGroups[i].classList.add('hidden-filter');
+      filterGroups[i].style.display = 'none';
+    }
+    
+    // 显示折叠按钮
+    if (filterToggle) {
+      filterToggle.classList.remove('hidden');
+    }
+    
+    isFilterExpanded = false;
+    updateFilterToggleButton();
+  }
+}
+
+// 切换筛选项显示状态
+function toggleFilterDisplay() {
+  if (!filterControls) return;
+  
+  const filterGroups = filterControls.querySelectorAll('.filter-group');
+  if (filterGroups.length <= 5) return; // 筛选项不超过5个，无需折叠
+  
+  isFilterExpanded = !isFilterExpanded;
+  
+  // 切换隐藏筛选项的显示状态
+  for (let i = 5; i < filterGroups.length; i++) {
+    if (isFilterExpanded) {
+      filterGroups[i].style.display = 'flex';
+    } else {
+      filterGroups[i].style.display = 'none';
+    }
+  }
+  
+  updateFilterToggleButton();
+}
+
+// 更新筛选项折叠按钮文本
+function updateFilterToggleButton() {
+  if (!toggleFilterButton) return;
+  
+  toggleFilterButton.textContent = isFilterExpanded ? '收起筛选项' : '显示更多筛选项';
 }
 
 // 创建保存按钮

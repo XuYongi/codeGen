@@ -145,6 +145,24 @@ section h2 {
     position: relative;
 }
 
+/* 代码块展开/折叠按钮样式 */
+.code-toggle-button {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.code-toggle-button:hover {
+    background: #2980b9;
+}
+
 /* 表格样式 */
 .data-table {
     width: 100%;
@@ -193,8 +211,7 @@ section h2 {
 .json-content {
     padding: 1rem;
     background-color: #f8f8f8;
-    overflow: hidden;
-    position: relative;
+    overflow: auto;
 }
 
 .json-content pre {
@@ -294,6 +311,36 @@ section h2 {
 }
 
 .filter-group input.hidden {
+    display: none;
+}
+
+/* 筛选控件容器 */
+.filter-controls-container {
+    position: relative;
+}
+
+/* 筛选项折叠切换按钮 */
+.filter-toggle {
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.filter-toggle button {
+    padding: 0.5rem 1rem;
+    background-color: #95a5a6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.filter-toggle button:hover {
+    background-color: #7f8c8d;
+}
+
+/* 隐藏的筛选项 */
+.hidden-filter {
     display: none;
 }
 
