@@ -154,12 +154,6 @@ async function handleFileSelect(event) {
       dataSection.classList.remove('hidden');
     }
     
-    // 隐藏上传区域
-    const uploadSection = document.getElementById('upload-section');
-    if (uploadSection) {
-      uploadSection.classList.add('hidden');
-    }
-    
     showDebugInfo('开始读取Excel文件');
     // 读取Excel文件
     const result = await ExcelProcessor.readFile(file);
@@ -561,9 +555,6 @@ function displayCurrentData() {
     
     // 更新悬浮窗面板标记信息
     updateFloatingPanelTagInfo(rowData);
-    
-    // 显示悬浮窗面板
-    showFloatingPanel();
     
     showDebugInfo('数据展示完成');
   } catch (error) {
