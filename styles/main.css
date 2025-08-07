@@ -1,471 +1,43 @@
-/* 全局样式重置 */
+/* 全局样式 */
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 }
 
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     color: #333;
-    background-color: #f4f4f4;
+    background-color: #f5f5f5;
 }
 
 /* 头部样式 */
 header {
-    background-color: #333;
-    color: #fff;
-    padding: 1rem 0;
+    background-color: #2c3e50;
+    color: white;
+    padding: 1rem;
     text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 header h1 {
     margin: 0;
+    font-size: 2rem;
+}
+
+/* 主容器样式 */
+.main-container {
+    display: flex;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    gap: 1rem;
 }
 
 /* 主体内容样式 */
 main {
-    padding: 2rem;
-    max-width: 1200px;
-    margin: 20px auto;
-}
-
-section {
-    background-color: #fff;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-section h2 {
-    color: #333;
-    margin-bottom: 1rem;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 0.5rem;
-}
-
-/* 上传区域样式 */
-.upload-area {
-    text-align: center;
-    padding: 2rem;
-    border: 2px dashed #ccc;
-    border-radius: 5px;
-}
-
-#file-input {
-    display: none;
-}
-
-.file-label {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.file-label:hover {
-    background-color: #0056b3;
-}
-
-/* 筛选控件样式 */
-.filter-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.filter-group label {
-    margin-bottom: 0.5rem;
-    font-weight: bold;
-}
-
-.filter-group select,
-.filter-group input {
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-}
-
-.filter-group input.custom-input {
-    margin-top: 0.5rem;
-}
-
-/* 视图控制样式 */
-.view-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    align-items: center;
-}
-
-.view-controls h3 {
-    margin: 0;
-}
-
-.view-controls button {
-    padding: 0.5rem 1rem;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    border-radius: 3px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.view-controls button:hover {
-    background-color: #f5f5f5;
-}
-
-.view-controls button.active {
-    background-color: #007bff;
-    color: white;
-    border-color: #007bff;
-}
-
-/* 单条数据展示样式 */
-.single-data-view h3 {
-    margin-bottom: 1rem;
-}
-
-.single-data-view h4 {
-    margin: 1rem 0 0.5rem 0;
-    color: #495057;
-}
-
-/* 所有字段单列显示 */
-.data-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-/* Prompt独占一列的样式 */
-.data-item.prompt-section-container {
-    grid-column: span 2;
-}
-
-@media (max-width: 768px) {
-    .data-item.prompt-section-container {
-        grid-column: span 1;
-    }
-}
-
-.data-item {
-    border: 1px solid #eee;
-    border-radius: 5px;
-    padding: 1rem;
-    background-color: #f8f9fa;
-}
-
-.data-label {
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-    color: #495057;
-}
-
-.data-value {
-    color: #212529;
-    white-space: pre-wrap;
-    word-break: break-word;
-}
-
-.data-value pre {
-    margin: 0;
-    white-space: pre-wrap; /* 改为pre-wrap以实现自适应换行 */
-    background-color: #fff;
-    padding: 0.5rem;
-    border-radius: 3px;
-    overflow-y: auto;
-    font-size: 12px;
-    line-height: 1.4;
-    max-height: 200px;
-    word-break: break-word;
-    word-wrap: break-word;
-}
-
-/* Prompt拆分内容样式 */
-.prompt-sections {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.prompt-section {
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.prompt-section-title {
-    background-color: #e9ecef;
-    padding: 0.5rem;
-    font-weight: bold;
-    border-bottom: 1px solid #dee2e6;
-}
-
-.prompt-section pre {
-    margin: 0;
-    border: none;
-    border-radius: 0;
-}
-
-/* 代码块样式 */
-.code-block {
-    margin: 0;
-    padding: 1rem;
-    background-color: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 4px;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 14px;
-    line-height: 1.4;
-    white-space: pre-wrap;
-    overflow: auto;
-    word-break: break-word;
-    word-wrap: break-word;
-    resize: vertical;
-    min-height: 150px;
-    max-height: none; /* 移除最大高度限制 */
-    height: auto;
-}
-
-.code-block.java {
-    background-color: #f8f9fa;
-    border-left: 3px solid #007bff;
-}
-
-/* 其他字段切换按钮 */
-.other-fields-toggle {
-    margin-top: 1rem;
-    text-align: center;
-}
-
-.other-fields-toggle button {
-    padding: 0.5rem 1rem;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    border-radius: 3px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.other-fields-toggle button:hover {
-    background-color: #f5f5f5;
-}
-
-/* JSON视图样式 */
-.json-view {
-    border: 1px solid #eee;
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.json-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #eee;
-}
-
-.json-header h3 {
-    margin: 0;
-}
-
-.toggle-button {
-    padding: 0.25rem 0.5rem;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    border-radius: 3px;
-    cursor: pointer;
-}
-
-.json-content {
-    padding: 1rem;
-    background-color: #f8f9fa;
-    transition: max-height 0.3s ease;
-}
-
-.json-content.collapsed {
-    max-height: 100px;
-    overflow: hidden;
-}
-
-.json-content.expanded {
-    overflow-y: auto;
-}
-
-.json-content pre {
-    margin: 0;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    font-size: 14px;
-    line-height: 1.5;
-    color: #333;
-}
-
-/* 表格样式 */
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-}
-
-.data-table th,
-.data-table td {
-    padding: 0.75rem;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-    vertical-align: top;
-}
-
-.data-table th {
-    background-color: #f8f9fa;
-    font-weight: bold;
-    position: sticky;
-    top: 0;
-}
-
-.data-table tr:hover {
-    background-color: #f5f5f5;
-}
-
-.data-table pre {
-    margin: 0;
-    white-space: pre-wrap;
-    background-color: #fff;
-    padding: 0.5rem;
-    border-radius: 3px;
-    overflow: auto;
-    font-size: 12px;
-    line-height: 1.4;
-    resize: vertical; /* 允许垂直调整大小 */
-    min-height: 50px; /* 设置最小高度 */
-}
-
-.data-table .code-block {
-    font-size: 12px;
-    padding: 0.5rem;
-    white-space: pre-wrap;
-    overflow: auto;
-    resize: vertical;
-    min-height: 80px;
-    max-height: none; /* 移除最大高度限制 */
-}
-
-.data-table .prompt-sections {
-    gap: 0.5rem;
-}
-
-.data-table .prompt-section-title {
-    padding: 0.25rem;
-    font-size: 12px;
-}
-
-.data-table .prompt-section pre {
-    padding: 0.25rem;
-    font-size: 11px;
-    max-height: 100px;
-    resize: vertical; /* 允许垂直调整大小 */
-    min-height: 40px; /* 设置最小高度 */
-}
-
-/* 分页控件样式 */
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-    margin: 1rem 0;
-}
-
-.pagination button {
-    padding: 0.5rem 1rem;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    border-radius: 3px;
-    cursor: pointer;
-}
-
-.pagination button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.page-info {
-    font-weight: bold;
-}
-
-/* 数据信息样式 */
-#data-info {
-    margin-bottom: 1rem;
-    padding: 1rem;
-    background-color: #e9ecef;
-    border-radius: 5px;
-}
-
-/* 调试信息样式 */
-#debug-info {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    padding: 1rem;
-    max-height: 300px;
-    overflow-y: auto;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 12px;
-}
-
-#debug-info p {
-    margin: 0.25rem 0;
-    padding: 0.25rem 0;
-    border-bottom: 1px solid #eee;
-}
-
-/* 错误提示样式 */
-.error {
-    color: #dc3545;
-    padding: 1rem;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    border-radius: 4px;
-    margin: 1rem 0;
-}
-
-/* 加载状态样式 */
-.loading {
-    text-align: center;
-    padding: 2rem;
-    color: #6c757d;
-}
-
-.loading::before {
-    content: "⏳ ";
-    margin-right: 0.5rem;
-}
-
-/* 隐藏类 */
-.hidden {
-    display: none;
-}
-
-/* 底部样式 */
-footer {
-    background-color: #333;
-    color: #fff;
-    text-align: center;
-    padding: 1rem 0;
-    margin-top: 2rem;
+    flex: 1;
 }
 
 /* 悬浮面板样式 */
@@ -474,7 +46,7 @@ footer {
     top: 50%;
     right: 0;
     transform: translateY(-50%);
-    width: 200px;
+    width: 400px;
     background-color: white;
     border-radius: 8px 0 0 8px;
     box-shadow: -2px 0 10px rgba(0,0,0,0.1);
@@ -587,18 +159,529 @@ footer {
     background-color: #2980b9;
 }
 
+/* 区块样式 */
+section {
+    background-color: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+section h2 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 0.5rem;
+}
+
+/* 上传区域样式 */
+.upload-area {
+    text-align: center;
+    padding: 2rem;
+    border: 2px dashed #3498db;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    transition: background-color 0.3s ease;
+}
+
+.upload-area:hover {
+    background-color: #e3f2fd;
+}
+
+.file-label {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background-color: #3498db;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-weight: bold;
+}
+
+.file-label:hover {
+    background-color: #2980b9;
+}
+
+#file-input {
+    display: none;
+}
+
+/* 隐藏类 */
+.hidden {
+    display: none;
+}
+
+/* 数据列表样式 */
+.data-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.data-item {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fafafa;
+    height: auto;
+    min-height: fit-content;
+}
+
+.data-label {
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.data-value {
+    flex: 1;
+}
+
+/* 代码块样式 */
+.code-block {
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 1rem;
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    height: 250px; /* 默认显示约15行 */
+    overflow: auto; /* 添加滚动条 */
+    position: relative;
+    resize: vertical;
+    min-height: 150px;
+}
+
+/* Java代码块样式 */
+.code-block.language-java {
+    background: #f8f9fa;
+    border-left: 3px solid #007bff;
+}
+
+/* 表格中的代码块样式 */
+.data-table pre,
+.data-table .code-block {
+    height: 150px; /* 表格中默认显示约15行 */
+    overflow: auto; /* 添加滚动条 */
+    position: relative;
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* 表格中prompt部分的代码块样式 */
+.data-table .prompt-section pre {
+    height: 150px; /* 表格中默认显示约15行 */
+    overflow: auto; /* 添加滚动条 */
+    position: relative;
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* 代码块展开/折叠按钮样式 */
+.code-toggle-button {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.code-toggle-button:hover {
+    background: #2980b9;
+}
+
+/* 代码块展开时的样式 */
+.code-block.expanded {
+    height: auto;
+    overflow: visible;
+    max-height: none;
+}
+
+/* 表格样式 */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.data-table th,
+.data-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border: 1px solid #ddd;
+    height: auto;
+}
+
+.data-table th {
+    background-color: #3498db;
+    color: white;
+    font-weight: bold;
+}
+
+.data-table tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.data-table tbody tr:hover {
+    background-color: #e3f2fd;
+}
+
+/* JSON视图样式 */
+.json-view {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.json-header {
+    background-color: #3498db;
+    color: white;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.json-content {
+    padding: 1rem;
+    background-color: #f8f8f8;
+    overflow: auto;
+}
+
+.json-content pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.json-content.collapsed pre {
+    max-height: 100px;
+    overflow: hidden;
+}
+
+.json-content.expanded pre {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+}
+
+.toggle-button {
+    background-color: white;
+    color: #3498db;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.toggle-button:hover {
+    background-color: #f0f0f0;
+}
+
+/* 分页样式 */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.pagination button {
+    padding: 0.5rem 1rem;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.pagination button:hover:not(:disabled) {
+    background-color: #2980b9;
+}
+
+.pagination button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
+.page-info {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+/* 筛选控件样式 */
+.filter-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.filter-group select,
+.filter-group input {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.filter-group input.custom-input {
+    margin-top: 0.5rem;
+}
+
+.filter-group input.hidden {
+    display: none;
+}
+
+/* 筛选控件容器 */
+.filter-controls-container {
+    position: relative;
+}
+
+/* 筛选项折叠切换按钮 */
+.filter-toggle {
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.filter-toggle button {
+    padding: 0.5rem 1rem;
+    background-color: #95a5a6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.filter-toggle button:hover {
+    background-color: #7f8c8d;
+}
+
+/* 隐藏的筛选项 */
+.hidden-filter {
+    display: none;
+}
+
+/* 视图控制样式 */
+.view-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+}
+
+.view-controls h3 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.view-controls button {
+    padding: 0.5rem 1rem;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.view-controls button:hover {
+    background-color: #2980b9;
+}
+
+.view-controls button.active {
+    background-color: #2c3e50;
+}
+
+/* 错误信息样式 */
+.error {
+    color: #e74c3c;
+    background-color: #fdf2f2;
+    border: 1px solid #e74c3c;
+    padding: 1rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+}
+
+/* 警告信息样式 */
+.warning {
+    color: #f39c12;
+    background-color: #fff9e6;
+    border: 1px solid #f39c12;
+    padding: 1rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+}
+
+/* Prompt拆分内容样式 */
+.prompt-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.prompt-section {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.prompt-section-title {
+    background-color: #3498db;
+    color: white;
+    padding: 0.5rem 1rem;
+    font-weight: bold;
+}
+
+.prompt-section pre {
+    margin: 0;
+    height: 250px; /* 默认显示约15行 */
+    overflow: auto; /* 添加滚动条 */
+    position: relative;
+    resize: vertical;
+    min-height: 150px;
+}
+
+/* 更多部分提示样式 */
+.more-sections {
+    text-align: center;
+    padding: 1rem;
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+/* 其他字段容器样式 */
+.other-fields-container {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ddd;
+}
+
+.other-fields-container h4 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+/* 其他字段切换按钮样式 */
+.other-fields-toggle {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.other-fields-toggle button {
+    padding: 0.5rem 1rem;
+    background-color: #95a5a6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.other-fields-toggle button:hover {
+    background-color: #7f8c8d;
+}
+
+/* 调试信息样式 */
+#debug-section {
+    background-color: #2c3e50;
+    color: white;
+}
+
+#debug-info {
+    background-color: #34495e;
+    padding: 1rem;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+}
+
+#debug-info p {
+    margin: 0.25rem 0;
+}
+
+/* 加载状态样式 */
+#data-container p:first-child {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #7f8c8d;
+}
+
+/* 底部样式 */
+footer {
+    background-color: #2c3e50;
+    color: white;
+    text-align: center;
+    padding: 1rem;
+    margin-top: 2rem;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
+    .main-container {
+        flex-direction: column;
+        margin: 1rem auto;
+        padding: 0 0.5rem;
+    }
+    
+    .floating-panel {
+        width: 300px;
+        top: auto;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        transform: none;
+        border-radius: 8px 8px 0 0;
+    }
+    
+    .floating-panel.collapsed {
+        width: auto;
+    }
+    
     main {
         padding: 1rem;
+        margin-bottom: 1rem;
     }
     
     section {
         padding: 1rem;
+        margin-bottom: 1rem;
     }
     
-    .filter-container,
-    .data-list {
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .filter-container {
         grid-template-columns: 1fr;
     }
     
@@ -607,7 +690,17 @@ footer {
         align-items: stretch;
     }
     
-    .data-table .prompt-sections {
+    .pagination {
         flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .data-table {
+        font-size: 0.8rem;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 0.5rem;
     }
 }

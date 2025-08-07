@@ -1,4 +1,4 @@
-import { ExcelProcessor } from './excelProcessor.js'; // 确保路径正确，如果文件在同一目录下则该路径正确
+import { ExcelProcessor } from './excelProcessor.js';
 
 /**
  * 数据可视化组件
@@ -114,18 +114,53 @@ export class DataVisualizer {
                                             sectionTitle.textContent = sectionKey;
                                             
                                             const sectionContent = document.createElement('pre');
-                                            sectionContent.className = 'code-block java';
-                                            // 限制显示的字符数以提高性能
-                                            let content = sections[sectionKey];
-                                            if (content.length > 1000) {
-                                                content = content.substring(0, 1000) + '... (内容已截断)';
-                                            }
+                                            sectionContent.className = 'code-block language-java';
+                                            // 设置默认显示15行高度，并添加展开/折叠功能
+                                            sectionContent.style.height = '150px'; // 表格中默认显示约15行
+                                            sectionContent.style.overflow = 'auto'; // 添加滚动条
+                                            sectionContent.style.position = 'relative';
+                                            sectionContent.style.resize = 'vertical';
                                             // 保持原始格式，包括缩进
-                                            sectionContent.textContent = content;
+                                            sectionContent.textContent = sections[sectionKey];
                                             
+                                            // 添加展开/折叠按钮
+                                            const toggleButton = document.createElement('button');
+                                            toggleButton.className = 'code-toggle-button';
+                                            toggleButton.textContent = '展开';
+                                            toggleButton.style.position = 'absolute';
+                                            toggleButton.style.bottom = '10px';
+                                            toggleButton.style.right = '10px';
+                                            toggleButton.style.padding = '5px 10px';
+                                            toggleButton.style.background = '#3498db';
+                                            toggleButton.style.color = 'white';
+                                            toggleButton.style.border = 'none';
+                                            toggleButton.style.borderRadius = '4px';
+                                            toggleButton.style.cursor = 'pointer';
+                                            
+                                            toggleButton.addEventListener('click', function() {
+                                                if (sectionContent.style.height === '150px' || sectionContent.style.height === '') {
+                                                    sectionContent.style.height = 'auto'; // 展开到完整内容
+                                                    toggleButton.textContent = '折叠';
+                                                    
+                                                    // 重新应用语法高亮
+                                                    if (typeof Prism !== 'undefined') {
+                                                        Prism.highlightElement(sectionContent);
+                                                    }
+                                                } else {
+                                                    sectionContent.style.height = '150px';
+                                                    toggleButton.textContent = '展开';
+                                                }
+                                            });
+                                            
+                                            sectionContent.appendChild(toggleButton);
                                             sectionDiv.appendChild(sectionTitle);
                                             sectionDiv.appendChild(sectionContent);
                                             sectionsContainer.appendChild(sectionDiv);
+                                            
+                                            // 应用语法高亮
+                                            if (typeof Prism !== 'undefined') {
+                                                Prism.highlightElement(sectionContent);
+                                            }
                                         });
                                         
                                         // 如果有更多部分，显示提示
@@ -176,6 +211,9 @@ export class DataVisualizer {
             
             table.appendChild(tbody);
             container.appendChild(table);
+            
+            // 应用语法高亮
+            this.applySyntaxHighlighting(container);
         } catch (error) {
             console.error('创建表格时出错:', error);
             container.innerHTML = '<p class="error">创建表格时出错: ' + error.message + '</p>';
@@ -415,20 +453,60 @@ export class DataVisualizer {
                                 sectionTitle.textContent = sectionKey;
                                 
                                 const sectionContent = document.createElement('pre');
-                                sectionContent.className = 'code-block java';
+                                sectionContent.className = 'code-block language-java';
+                                // 设置默认显示15行高度，并添加展开/折叠功能
+                                sectionContent.style.height = '250px'; // 约15行的高度
+                                sectionContent.style.overflow = 'auto'; // 添加滚动条
+                                sectionContent.style.position = 'relative';
+                                sectionContent.style.resize = 'vertical';
                                 // 保持原始格式，包括缩进
                                 sectionContent.textContent = sections[sectionKey];
                                 
+                                // 添加展开/折叠按钮
+                                const toggleButton = document.createElement('button');
+                                toggleButton.className = 'code-toggle-button';
+                                toggleButton.textContent = '展开';
+                                toggleButton.style.position = 'absolute';
+                                toggleButton.style.bottom = '10px';
+                                toggleButton.style.right = '10px';
+                                toggleButton.style.padding = '5px 10px';
+                                toggleButton.style.background = '#3498db';
+                                toggleButton.style.color = 'white';
+                                toggleButton.style.border = 'none';
+                                toggleButton.style.borderRadius = '4px';
+                                toggleButton.style.cursor = 'pointer';
+                                
+                                toggleButton.addEventListener('click', function() {
+                                    if (sectionContent.style.height === '250px' || sectionContent.style.height === '') {
+                                        sectionContent.style.height = 'auto'; // 展开到完整内容
+                                        toggleButton.textContent = '折叠';
+                                        
+                                        // 重新应用语法高亮
+                                        if (typeof Prism !== 'undefined') {
+                                            Prism.highlightElement(sectionContent);
+                                        }
+                                    } else {
+                                        sectionContent.style.height = '250px';
+                                        toggleButton.textContent = '展开';
+                                    }
+                                });
+                                
+                                sectionContent.appendChild(toggleButton);
                                 sectionDiv.appendChild(sectionTitle);
                                 sectionDiv.appendChild(sectionContent);
                                 sectionsContainer.appendChild(sectionDiv);
+                                
+                                // 应用语法高亮
+                                if (typeof Prism !== 'undefined') {
+                                    Prism.highlightElement(sectionContent);
+                                }
                             });
                         }
                         
                         promptValue.appendChild(sectionsContainer);
                     } else {
                         const pre = document.createElement('pre');
-                        pre.className = 'code-block java';
+                        pre.className = 'code-block language-java';
                         pre.textContent = '非JSON格式: ' + extraParamsStr || '';
                         promptValue.appendChild(pre);
                     }
@@ -436,7 +514,7 @@ export class DataVisualizer {
                     // 解析失败则显示原始值
                     console.warn('解析extra_params失败:', e);
                     const pre = document.createElement('pre');
-                    pre.className = 'code-block java';
+                    pre.className = 'code-block language-java';
                     pre.textContent = '解析失败: ' + extraParamsStr || '';
                     promptValue.appendChild(pre);
                 }
@@ -450,7 +528,6 @@ export class DataVisualizer {
             promptItem.appendChild(promptValue);
             dataList.appendChild(promptItem);
             
-            
             // 显示其他字段（包括原来的extra_params）
             const otherFieldsToggle = document.createElement('div');
             otherFieldsToggle.className = 'other-fields-toggle';
@@ -463,12 +540,14 @@ export class DataVisualizer {
             dataView.appendChild(dataList);
             dataView.appendChild(otherFieldsToggle);
             container.appendChild(dataView);
+            
+            // 应用语法高亮
+            this.applySyntaxHighlighting(container);
         } catch (error) {
             console.error('创建单条数据视图时出错:', error);
             container.innerHTML = '<p class="error">创建单条数据视图时出错: ' + error.message + '</p>';
         }
     }
-    
     
     /**
      * 切换显示其他字段
@@ -482,7 +561,7 @@ export class DataVisualizer {
             const displayedKeys = displayedFields.map(f => f.key);
             
             // 查找未显示的字段（排除我们已经单独提取的字段）
-            const excludeKeys = ['prompt_sections', 'manualTag', 'manualRemark']; // 不在"其他字段"中重复显示的字段
+            const excludeKeys = ['prompt_sections']; // 不在"其他字段"中重复显示的字段
             const otherFields = Object.keys(rowData)
                 .filter(key => !displayedKeys.includes(key) && !excludeKeys.includes(key) && key !== '_rowIndex')
                 .map(key => ({ key, label: key }));
@@ -571,6 +650,9 @@ export class DataVisualizer {
             if (toggleButton) {
                 toggleButton.parentElement.remove();
             }
+            
+            // 应用语法高亮
+            this.applySyntaxHighlighting(container);
         } catch (error) {
             console.error('切换其他字段显示时出错:', error);
         }
@@ -946,6 +1028,22 @@ export class DataVisualizer {
             });
         } catch (error) {
             console.error('更新筛选控件时出错:', error);
+        }
+    }
+    
+    /**
+     * 应用语法高亮到代码块
+     * @param {HTMLElement} container - 包含代码块的容器元素
+     */
+    static applySyntaxHighlighting(container) {
+        // 确保Prism.js已加载
+        if (typeof Prism !== 'undefined') {
+            // 查找所有带有language-java类的代码块
+            const codeBlocks = container.querySelectorAll('pre.language-java');
+            codeBlocks.forEach(block => {
+                // 应用语法高亮
+                Prism.highlightElement(block);
+            });
         }
     }
 }
