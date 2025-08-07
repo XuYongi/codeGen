@@ -40,19 +40,24 @@ export class ExcelProcessor {
                         // 将工作表转换为JSON
                         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                         
-                        resolve(jsonData);
+                        resolve({ 
+                            data: jsonData, 
+                            workbook: workbook, 
+                            worksheet: worksheet, 
+                            sheetName: firstSheetName
+                        });
                     } catch (error) {
-                        reject(new Error(`解析Excel文件时出错: ${error.message}`));
+                        reject(new Error('解析Excel文件时出错: ' + error.message));
                     }
                 };
                 
                 reader.onerror = (error) => {
-                    reject(new Error(`读取文件时出错: ${error.message}`));
+                    reject(new Error('读取文件时出错: ' + error.message));
                 };
                 
                 reader.readAsArrayBuffer(file);
             } catch (error) {
-                reject(new Error(`处理文件时发生未知错误: ${error.message}`));
+                reject(new Error('处理文件时发生未知错误: ' + error.message));
             }
         });
     }
@@ -100,7 +105,7 @@ export class ExcelProcessor {
                         
                         return processedRow;
                     } catch (error) {
-                        console.warn(`处理第${i + index + 1}行数据时出错:`, error);
+                        console.warn('处理第' + (i + index + 1) + '行数据时出错:', error);
                         return {};
                     }
                 }).filter(row => row && Object.keys(row).length > 0); // 过滤掉空行
@@ -190,8 +195,72 @@ export class ExcelProcessor {
             // 转换为数组并排序
             return Array.from(values).sort();
         } catch (error) {
-            console.error(`获取列 ${columnName} 的唯一值时出错:`, error);
+            console.error('获取列 ' + columnName + ' 的唯一值时出错:', error);
             return [];
+        }
+    }
+    
+    /**
+     * 保存数据到Excel文件（直接修改原始文件）
+     * @param {Object} workbookData - 包含工作簿信息的对象
+     * @param {Array} headers - 表头
+     * @param {Array} data - 数据
+     * @param {string} filename - 文件名
+     */
+    static saveToFile(workbookData, headers, data, filename) {
+        try {
+            // 获取原始工作簿和工作表
+            const workbook = workbookData.workbook;
+            const sheetName = workbookData.sheetName;
+            
+            // 准备数据（将对象数组转换为二维数组）
+            const worksheetData = [];
+            
+            // 添加表头
+            worksheetData.push(headers);
+            
+            // 添加数据行
+            data.forEach(row => {
+                const rowData = [];
+                headers.forEach(header => {
+                    rowData.push(row[header] !== undefined ? row[header] : '');
+                });
+                worksheetData.push(rowData);
+            });
+            
+            // 创建新的工作表
+            const newWorksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+            
+            // 替换原始工作表
+            workbook.Sheets[sheetName] = newWorksheet;
+            
+            // 导出文件
+            XLSX.writeFile(workbook, filename);
+        } catch (error) {
+            console.error('保存文件时出错:', error);
+            throw new Error('保存文件时出错: ' + error.message);
+        }
+    }
+    
+    /**
+     * 更新特定行的数据
+     * @param {Object} workbookData - 包含工作簿信息的对象
+     * @param {Array} headers - 表头
+     * @param {Array} data - 所有数据
+     * @param {Object} rowData - 要更新的行数据
+     * @param {number} rowIndex - 行索引（从0开始，不包括表头）
+     */
+    static updateRowInPlace(workbookData, headers, data, rowData, rowIndex) {
+        try {
+            // 更新内存中的数据
+            if (rowIndex >= 0 && rowIndex < data.length) {
+                data[rowIndex] = { ...data[rowIndex], ...rowData };
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('更新行数据时出错:', error);
+            throw new Error('更新行数据时出错: ' + error.message);
         }
     }
 }

@@ -35,6 +35,7 @@ function checkModulesLoaded() {
 // DOM元素
 let fileInput, filterSection, viewSection, dataSection, filterControls, 
     viewControls, paginationControls, dataContainer, dataInfo, debugSection, debugInfo;
+let saveButton, saveToOriginalButton; // 添加保存按钮引用
 
 // 全局变量
 let originalData = [];
@@ -42,12 +43,14 @@ let currentData = [];
 let headers = [];
 let currentIndex = 0;
 let currentView = 'single'; // 'single', 'json', 'table'
+let originalFile = null; // 保存原始文件引用
+let workbookData = null; // 保存工作簿数据
 
 // 显示调试信息的函数
 function showDebugInfo(message) {
   if (debugInfo) {
     const time = new Date().toLocaleTimeString();
-    debugInfo.innerHTML += `<p>[${time}] ${message}</p>`;
+    debugInfo.innerHTML += '<p>[' + time + '] ' + message + '</p>';
     debugInfo.scrollTop = debugInfo.scrollHeight; // 滚动到底部
   }
   if (debugSection) {
@@ -59,7 +62,7 @@ function showDebugInfo(message) {
 // 显示加载状态的函数
 function showLoadingStatus(message) {
   if (dataContainer) {
-    dataContainer.innerHTML = `<p>⏳ ${message}</p>`;
+    dataContainer.innerHTML = '<p>⏳ ' + message + '</p>';
   }
 }
 
@@ -104,7 +107,10 @@ async function handleFileSelect(event) {
     return;
   }
   
-  showDebugInfo(`选择的文件: ${file.name}, 大小: ${file.size} bytes`);
+  // 保存原始文件引用
+  originalFile = file;
+  
+  showDebugInfo('选择的文件: ' + file.name + ', 大小: ' + file.size + ' bytes');
   
   try {
     // 检查模块是否已加载
@@ -124,20 +130,29 @@ async function handleFileSelect(event) {
     
     showDebugInfo('开始读取Excel文件');
     // 读取Excel文件
-    const rawData = await ExcelProcessor.readFile(file);
-    showDebugInfo(`原始数据读取完成，数据行数: ${rawData ? rawData.length : 0}`);
+    const result = await ExcelProcessor.readFile(file);
+    workbookData = result; // 保存工作簿数据
+    showDebugInfo('原始数据读取完成，数据行数: ' + (result.data ? result.data.length : 0));
     
     // 处理数据
     showLoadingStatus('正在处理数据...');
     showDebugInfo('开始处理数据');
-    const processedData = ExcelProcessor.processData(rawData);
-    showDebugInfo(`数据处理完成，处理后的数据条数: ${processedData.data ? processedData.data.length : 0}`);
+    const processedData = ExcelProcessor.processData(result.data);
+    showDebugInfo('数据处理完成，处理后的数据条数: ' + (processedData.data ? processedData.data.length : 0));
     
     originalData = processedData.data || [];
     currentData = [...originalData];
     headers = processedData.headers || [];
     
-    showDebugInfo(`数据赋值完成，原始数据条数: ${originalData.length}`);
+    // 添加人工标签和人工备注列（如果不存在）
+    if (!headers.includes('manualTag')) {
+      headers.push('manualTag');
+    }
+    if (!headers.includes('manualRemark')) {
+      headers.push('manualRemark');
+    }
+    
+    showDebugInfo('数据赋值完成，原始数据条数: ' + originalData.length);
     
     // 重置索引
     currentIndex = 0;
@@ -173,6 +188,9 @@ async function handleFileSelect(event) {
       viewSection.classList.remove('hidden');
     }
     
+    // 添加保存按钮
+    createSaveButtons();
+    
     // 显示数据
     showLoadingStatus('正在显示数据...');
     showDebugInfo('显示数据信息');
@@ -182,20 +200,135 @@ async function handleFileSelect(event) {
     
     showDebugInfo('文件处理完成');
   } catch (error) {
-    const errorMsg = `处理文件时出错: ${error.message}\n堆栈信息: ${error.stack}`;
+    const errorMsg = '处理文件时出错: ' + error.message + '\n堆栈信息: ' + error.stack;
     showDebugInfo(errorMsg);
     console.error('处理文件时出错:', error);
     if (dataContainer) {
-      dataContainer.innerHTML = `<p class="error">处理文件时出错: ${error.message}</p>
-                                 <p>请检查文件格式是否正确（支持 .xlsx 和 .xls 格式）</p>
-                                 <p>详细错误信息已在调试区域显示</p>`;
+      dataContainer.innerHTML = '<p class="error">处理文件时出错: ' + error.message + '</p>' +
+                                 '<p>请检查文件格式是否正确（支持 .xlsx 和 .xls 格式）</p>' +
+                                 '<p>详细错误信息已在调试区域显示</p>';
     }
+  }
+}
+
+// 创建保存按钮
+function createSaveButtons() {
+  // 移除已存在的保存按钮
+  if (saveButton) {
+    saveButton.remove();
+  }
+  if (saveToOriginalButton) {
+    saveToOriginalButton.remove();
+  }
+  
+  // 创建保存按钮（保存为新文件）
+  saveButton = document.createElement('button');
+  saveButton.textContent = '保存为新文件';
+  saveButton.style.marginLeft = '1rem';
+  saveButton.style.padding = '0.5rem 1rem';
+  saveButton.addEventListener('click', saveMarkedData);
+  
+  // 创建保存到原始文件按钮
+  saveToOriginalButton = document.createElement('button');
+  saveToOriginalButton.textContent = '保存到原始文件';
+  saveToOriginalButton.style.marginLeft = '1rem';
+  saveToOriginalButton.style.padding = '0.5rem 1rem';
+  saveToOriginalButton.addEventListener('click', saveToOriginalFile);
+  
+  // 将保存按钮添加到视图控制区域
+  if (viewControls) {
+    viewControls.appendChild(saveButton);
+    viewControls.appendChild(saveToOriginalButton);
+  }
+}
+
+// 保存标记数据到新文件
+async function saveMarkedData() {
+  try {
+    if (!ExcelProcessor) {
+      alert('ExcelProcessor模块未加载');
+      return;
+    }
+    
+    if (!originalFile) {
+      alert('未加载原始文件');
+      return;
+    }
+    
+    if (!workbookData || !headers || !currentData || currentData.length === 0) {
+      alert('没有数据可保存');
+      return;
+    }
+    
+    showLoadingStatus('正在保存数据...');
+    
+    // 生成文件名
+    const originalName = originalFile.name;
+    const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.'));
+    const ext = originalName.substring(originalName.lastIndexOf('.'));
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const newFilename = nameWithoutExt + '_marked_' + timestamp + ext;
+    
+    // 保存文件
+    ExcelProcessor.saveToFile(workbookData, headers, currentData, newFilename);
+    
+    showDebugInfo('文件保存成功: ' + newFilename);
+    alert('文件保存成功: ' + newFilename);
+    
+    // 重新显示当前数据
+    displayCurrentData();
+  } catch (error) {
+    const errorMsg = '保存文件时出错: ' + error.message + '\n堆栈信息: ' + error.stack;
+    showDebugInfo(errorMsg);
+    console.error('保存文件时出错:', error);
+    alert('保存文件时出错: ' + error.message);
+  }
+}
+
+// 保存标记数据到原始文件
+async function saveToOriginalFile() {
+  try {
+    if (!ExcelProcessor) {
+      alert('ExcelProcessor模块未加载');
+      return;
+    }
+    
+    if (!originalFile) {
+      alert('未加载原始文件');
+      return;
+    }
+    
+    if (!workbookData || !headers || !currentData || currentData.length === 0) {
+      alert('没有数据可保存');
+      return;
+    }
+    
+    // 确认操作
+    if (!confirm('确定要直接修改原始文件吗？此操作不可撤销。')) {
+      return;
+    }
+    
+    showLoadingStatus('正在保存数据到原始文件...');
+    
+    // 保存文件（覆盖原始文件）
+    ExcelProcessor.saveToFile(workbookData, headers, currentData, originalFile.name);
+    
+    showDebugInfo('原始文件已更新: ' + originalFile.name);
+    alert('原始文件已更新: ' + originalFile.name);
+    
+    // 重新显示当前数据
+    displayCurrentData();
+  } catch (error) {
+    const errorMsg = '保存文件时出错: ' + error.message + '\n堆栈信息: ' + error.stack;
+    showDebugInfo(errorMsg);
+    console.error('保存文件时出错:', error);
+    alert('保存文件时出错: ' + error.message);
   }
 }
 
 // 筛选条件变化处理
 function handleFilterChange(filters) {
-  showDebugInfo(`筛选条件变化: ${JSON.stringify(filters)}`);
+  showDebugInfo('筛选条件变化: ' + JSON.stringify(filters));
   
   try {
     // 检查模块是否已加载
@@ -211,7 +344,7 @@ function handleFilterChange(filters) {
     if (originalData) {
       const oldLength = currentData.length;
       currentData = ExcelProcessor.filterData(originalData, filters);
-      showDebugInfo(`筛选完成，筛选前: ${oldLength} 条，筛选后: ${currentData.length} 条`);
+      showDebugInfo('筛选完成，筛选前: ' + oldLength + ' 条，筛选后: ' + currentData.length + ' 条');
     }
     
     // 重置索引
@@ -226,7 +359,7 @@ function handleFilterChange(filters) {
       DataVisualizer.updateFilterControls(filters, filterControls);
     }
   } catch (error) {
-    const errorMsg = `处理筛选条件变化时出错: ${error.message}\n堆栈信息: ${error.stack}`;
+    const errorMsg = '处理筛选条件变化时出错: ' + error.message + '\n堆栈信息: ' + error.stack;
     showDebugInfo(errorMsg);
     console.error('处理筛选条件变化时出错:', error);
   }
@@ -234,7 +367,7 @@ function handleFilterChange(filters) {
 
 // 视图变化处理
 function handleViewChange(view) {
-  showDebugInfo(`视图变化: ${view}`);
+  showDebugInfo('视图变化: ' + view);
   
   try {
     // 检查模块是否已加载
@@ -255,12 +388,15 @@ function handleViewChange(view) {
         handleViewChange,
         viewControls
       );
+      
+      // 重新添加保存按钮
+      createSaveButtons();
     }
     
     // 重新显示当前数据
     displayCurrentData();
   } catch (error) {
-    const errorMsg = `处理视图变化时出错: ${error.message}\n堆栈信息: ${error.stack}`;
+    const errorMsg = '处理视图变化时出错: ' + error.message + '\n堆栈信息: ' + error.stack;
     showDebugInfo(errorMsg);
     console.error('处理视图变化时出错:', error);
   }
@@ -268,7 +404,7 @@ function handleViewChange(view) {
 
 // 显示当前数据
 function displayCurrentData() {
-  showDebugInfo(`显示当前数据，索引: ${currentIndex}`);
+  showDebugInfo('显示当前数据，索引: ' + currentIndex);
   
   try {
     // 检查模块是否已加载
@@ -303,15 +439,15 @@ function displayCurrentData() {
     
     // 获取当前数据
     const rowData = currentData[currentIndex];
-    showDebugInfo(`当前行数据键数: ${rowData ? Object.keys(rowData).length : 0}`);
+    showDebugInfo('当前行数据键数: ' + (rowData ? Object.keys(rowData).length : 0));
     
     // 根据当前视图显示数据
     showLoadingStatus('正在显示数据...');
-    showDebugInfo(`准备显示视图: ${currentView}`);
+    showDebugInfo('准备显示视图: ' + currentView);
     switch (currentView) {
       case 'single':
         showDebugInfo('调用createSingleDataView');
-        DataVisualizer.createSingleDataView(rowData, dataContainer);
+        DataVisualizer.createSingleDataView(rowData, dataContainer, currentIndex);
         break;
       case 'json':
         showDebugInfo('调用createJsonView');
@@ -324,7 +460,7 @@ function displayCurrentData() {
         break;
       default:
         showDebugInfo('调用默认createSingleDataView');
-        DataVisualizer.createSingleDataView(rowData, dataContainer);
+        DataVisualizer.createSingleDataView(rowData, dataContainer, currentIndex);
     }
     
     // 创建分页控件
@@ -340,25 +476,25 @@ function displayCurrentData() {
     
     showDebugInfo('数据展示完成');
   } catch (error) {
-    const errorMsg = `显示数据时出错: ${error.message}\n堆栈信息: ${error.stack}`;
+    const errorMsg = '显示数据时出错: ' + error.message + '\n堆栈信息: ' + error.stack;
     showDebugInfo(errorMsg);
     console.error('显示数据时出错:', error);
     if (dataContainer) {
-      dataContainer.innerHTML = `<p class="error">显示数据时出错: ${error.message}</p>
-                                 <p>详细错误信息已在调试区域显示</p>`;
+      dataContainer.innerHTML = '<p class="error">显示数据时出错: ' + error.message + '</p>' +
+                                 '<p>详细错误信息已在调试区域显示</p>';
     }
   }
 }
 
 // 页面变化处理
 function handlePageChange(newIndex) {
-  showDebugInfo(`页面变化，新索引: ${newIndex}`);
+  showDebugInfo('页面变化，新索引: ' + newIndex);
   
   try {
     currentIndex = newIndex;
     displayCurrentData();
   } catch (error) {
-    const errorMsg = `处理页面变化时出错: ${error.message}\n堆栈信息: ${error.stack}`;
+    const errorMsg = '处理页面变化时出错: ' + error.message + '\n堆栈信息: ' + error.stack;
     showDebugInfo(errorMsg);
     console.error('处理页面变化时出错:', error);
   }
@@ -375,13 +511,11 @@ function displayDataInfo() {
     const totalRows = originalData ? originalData.length : 0;
     const filteredRows = currentData ? currentData.length : 0;
     
-    dataInfo.innerHTML = `
-      <p>总共: ${totalRows} 行数据</p>
-      ${filteredRows !== totalRows ? `<p>筛选后: ${filteredRows} 行数据</p>` : ''}
-    `;
-    showDebugInfo(`数据信息更新完成，总共: ${totalRows} 行，筛选后: ${filteredRows} 行`);
+    dataInfo.innerHTML = '<p>总共: ' + totalRows + ' 行数据</p>' +
+      (filteredRows !== totalRows ? '<p>筛选后: ' + filteredRows + ' 行数据</p>' : '');
+    showDebugInfo('数据信息更新完成，总共: ' + totalRows + ' 行，筛选后: ' + filteredRows + ' 行');
   } catch (error) {
-    const errorMsg = `显示数据信息时出错: ${error.message}\n堆栈信息: ${error.stack}`;
+    const errorMsg = '显示数据信息时出错: ' + error.message + '\n堆栈信息: ' + error.stack;
     showDebugInfo(errorMsg);
     console.error('显示数据信息时出错:', error);
   }

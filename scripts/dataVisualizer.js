@@ -1,4 +1,4 @@
-import { ExcelProcessor } from './excelProcessor.js';
+import { ExcelProcessor } from './excelProcessor.js'; // 确保路径正确，如果文件在同一目录下则该路径正确
 
 /**
  * 数据可视化组件
@@ -29,7 +29,7 @@ export class DataVisualizer {
             if (data.length > 100) {
                 const warning = document.createElement('div');
                 warning.className = 'warning';
-                warning.innerHTML = `<p>注意：数据量较大，仅显示前100条记录。总共 ${data.length} 条记录。</p>`;
+                warning.innerHTML = '<p>注意：数据量较大，仅显示前100条记录。总共 ' + data.length + ' 条记录。</p>';
                 container.appendChild(warning);
             }
             
@@ -132,7 +132,7 @@ export class DataVisualizer {
                                         if (sectionKeys.length > maxSections) {
                                             const moreDiv = document.createElement('div');
                                             moreDiv.className = 'more-sections';
-                                            moreDiv.textContent = `... 还有 ${sectionKeys.length - maxSections} 个部分`;
+                                            moreDiv.textContent = '... 还有 ' + (sectionKeys.length - maxSections) + ' 个部分';
                                             sectionsContainer.appendChild(moreDiv);
                                         }
                                     }
@@ -178,7 +178,7 @@ export class DataVisualizer {
             container.appendChild(table);
         } catch (error) {
             console.error('创建表格时出错:', error);
-            container.innerHTML = `<p class="error">创建表格时出错: ${error.message}</p>`;
+            container.innerHTML = '<p class="error">创建表格时出错: ' + error.message + '</p>';
         }
     }
     
@@ -269,8 +269,8 @@ export class DataVisualizer {
                     for (let i = 0; i < Math.min(paragraphs.length, maxParagraphs); i++) {
                         const paragraph = paragraphs[i];
                         if (paragraph.trim()) {
-                            sections[`段落 ${i + 1}`] = paragraph.trim();
-                            console.log(`段落 ${i + 1}:`, sections[`段落 ${i + 1}`].substring(0, 100) + '...');
+                            sections['段落 ' + (i + 1)] = paragraph.trim();
+                            console.log('段落 ' + (i + 1) + ':', sections['段落 ' + (i + 1)].substring(0, 100) + '...');
                         }
                     }
                 } else {
@@ -293,8 +293,9 @@ export class DataVisualizer {
      * 创建单条数据展示视图
      * @param {Object} rowData - 单行数据
      * @param {HTMLElement} container - 容器元素
+     * @param {number} rowIndex - 行索引
      */
-    static createSingleDataView(rowData, container) {
+    static createSingleDataView(rowData, container, rowIndex) {
         if (!container) {
             console.error('容器元素未指定');
             return;
@@ -449,6 +450,81 @@ export class DataVisualizer {
             promptItem.appendChild(promptValue);
             dataList.appendChild(promptItem);
             
+            // 添加人工标签和人工备注编辑区域
+            const editItem = document.createElement('div');
+            editItem.className = 'data-item';
+            
+            const editLabel = document.createElement('div');
+            editLabel.className = 'data-label';
+            editLabel.textContent = '人工标记';
+            
+            const editContent = document.createElement('div');
+            editContent.className = 'data-value';
+            
+            // 创建人工标签下拉框
+            const tagLabel = document.createElement('label');
+            tagLabel.textContent = '人工标签: ';
+            tagLabel.style.display = 'block';
+            tagLabel.style.marginBottom = '0.5rem';
+            
+            const tagSelect = document.createElement('select');
+            tagSelect.id = 'manual-tag';
+            tagSelect.style.marginRight = '1rem';
+            
+            const tagOptions = [
+                { value: '', label: '请选择标签' },
+                { value: 'correct', label: '正确输出' },
+                { value: 'incorrect', label: '错误输出' },
+                { value: 'doubtful', label: '存疑' }
+            ];
+            
+            tagOptions.forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option.value;
+                opt.textContent = option.label;
+                tagSelect.appendChild(opt);
+            });
+            
+            // 设置当前标签值
+            if (rowData.manualTag) {
+                tagSelect.value = rowData.manualTag;
+            }
+            
+            // 创建人工备注输入框
+            const remarkLabel = document.createElement('label');
+            remarkLabel.textContent = '人工备注: ';
+            remarkLabel.style.display = 'block';
+            remarkLabel.style.marginBottom = '0.5rem';
+            
+            const remarkInput = document.createElement('textarea');
+            remarkInput.id = 'manual-remark';
+            remarkInput.placeholder = '请输入备注信息';
+            remarkInput.style.width = '100%';
+            remarkInput.style.minHeight = '60px';
+            remarkInput.style.padding = '0.5rem';
+            
+            // 设置当前备注值
+            if (rowData.manualRemark) {
+                remarkInput.value = rowData.manualRemark;
+            }
+            
+            // 创建保存按钮
+            const saveButton = document.createElement('button');
+            saveButton.textContent = '保存标记';
+            saveButton.style.marginTop = '1rem';
+            saveButton.style.padding = '0.5rem 1rem';
+            saveButton.addEventListener('click', () => this.saveManualTag(rowData, tagSelect.value, remarkInput.value, rowIndex));
+            
+            editContent.appendChild(tagLabel);
+            editContent.appendChild(tagSelect);
+            editContent.appendChild(remarkLabel);
+            editContent.appendChild(remarkInput);
+            editContent.appendChild(saveButton);
+            
+            editItem.appendChild(editLabel);
+            editItem.appendChild(editContent);
+            dataList.appendChild(editItem);
+            
             // 显示其他字段（包括原来的extra_params）
             const otherFieldsToggle = document.createElement('div');
             otherFieldsToggle.className = 'other-fields-toggle';
@@ -463,7 +539,31 @@ export class DataVisualizer {
             container.appendChild(dataView);
         } catch (error) {
             console.error('创建单条数据视图时出错:', error);
-            container.innerHTML = `<p class="error">创建单条数据视图时出错: ${error.message}</p>`;
+            container.innerHTML = '<p class="error">创建单条数据视图时出错: ' + error.message + '</p>';
+        }
+    }
+    
+    /**
+     * 保存人工标签和备注
+     * @param {Object} rowData - 当前行数据
+     * @param {string} tag - 人工标签
+     * @param {string} remark - 人工备注
+     * @param {number} rowIndex - 行索引
+     */
+    static saveManualTag(rowData, tag, remark, rowIndex) {
+        try {
+            // 更新数据对象
+            rowData.manualTag = tag;
+            rowData.manualRemark = remark;
+            
+            // 显示保存成功提示
+            alert('标记保存成功！');
+            
+            // 这里可以添加更多保存逻辑，例如保存到localStorage或通过API发送到服务器
+            console.log('保存标记:', { rowIndex: rowIndex, tag, remark });
+        } catch (error) {
+            console.error('保存标记时出错:', error);
+            alert('保存标记失败: ' + error.message);
         }
     }
     
@@ -630,7 +730,7 @@ export class DataVisualizer {
             container.appendChild(jsonView);
         } catch (error) {
             console.error('创建JSON视图时出错:', error);
-            container.innerHTML = `<p class="error">创建JSON视图时出错: ${error.message}</p>`;
+            container.innerHTML = '<p class="error">创建JSON视图时出错: ' + error.message + '</p>';
         }
     }
     
@@ -699,7 +799,7 @@ export class DataVisualizer {
             // 创建页码信息
             const pageInfo = document.createElement('span');
             pageInfo.className = 'page-info';
-            pageInfo.textContent = `${currentIndex + 1} / ${total}`;
+            pageInfo.textContent = (currentIndex + 1) + ' / ' + total;
             
             // 创建下一页按钮
             const nextButton = document.createElement('button');
@@ -725,7 +825,7 @@ export class DataVisualizer {
                 if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= total) {
                     if (onPageChange) onPageChange(pageNumber - 1);
                 } else {
-                    alert(`请输入有效的页码 (1-${total})`);
+                    alert('请输入有效的页码 (1-' + total + ')');
                 }
             };
             
@@ -835,15 +935,15 @@ export class DataVisualizer {
                 
                 const label = document.createElement('label');
                 label.textContent = header;
-                label.setAttribute('for', `filter-${header}`);
+                label.setAttribute('for', 'filter-' + header);
                 
                 const select = document.createElement('select');
-                select.id = `filter-${header}`;
+                select.id = 'filter-' + header;
                 
                 // 添加默认选项
                 const defaultOption = document.createElement('option');
                 defaultOption.value = '';
-                defaultOption.textContent = `全部 ${header}`;
+                defaultOption.textContent = '全部 ' + header;
                 select.appendChild(defaultOption);
                 
                 // 获取该列的唯一值并添加到下拉框，但限制数量以提高性能
@@ -866,13 +966,13 @@ export class DataVisualizer {
                             if (uniqueValues.length > maxOptions) {
                                 const moreOption = document.createElement('option');
                                 moreOption.disabled = true;
-                                moreOption.textContent = `... 还有 ${uniqueValues.length - maxOptions} 个选项`;
+                                moreOption.textContent = '... 还有 ' + (uniqueValues.length - maxOptions) + ' 个选项';
                                 select.appendChild(moreOption);
                             }
                         }
                     }
                 } catch (error) {
-                    console.warn(`获取列 ${header} 的唯一值时出错:`, error);
+                    console.warn('获取列 ' + header + ' 的唯一值时出错:', error);
                 }
                 
                 // 添加"自定义输入"选项
@@ -884,7 +984,7 @@ export class DataVisualizer {
                 // 添加输入框（默认隐藏）
                 const input = document.createElement('input');
                 input.type = 'text';
-                input.placeholder = `输入筛选条件`;
+                input.placeholder = '输入筛选条件';
                 input.className = 'custom-input hidden';
                 
                 // 监听选择变化
@@ -920,7 +1020,7 @@ export class DataVisualizer {
             container.appendChild(filterContainer);
         } catch (error) {
             console.error('创建筛选控件时出错:', error);
-            container.innerHTML = `<p class="error">创建筛选控件时出错: ${error.message}</p>`;
+            container.innerHTML = '<p class="error">创建筛选控件时出错: ' + error.message + '</p>';
         }
     }
     
@@ -936,7 +1036,7 @@ export class DataVisualizer {
         
         try {
             Object.keys(filters).forEach(key => {
-                const select = container.querySelector(`#filter-${key}`);
+                const select = container.querySelector('#filter-' + key);
                 if (select) {
                     select.value = filters[key] || '';
                 }
