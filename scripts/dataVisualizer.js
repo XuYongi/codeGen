@@ -1,4 +1,4 @@
-import { ExcelProcessor } from './excelProcessor.js'; // 确保路径正确，如果文件在同一目录下则该路径正确
+import { ExcelProcessor } from './excelProcessor.js';
 
 /**
  * 数据可视化组件
@@ -115,14 +115,38 @@ export class DataVisualizer {
                                             
                                             const sectionContent = document.createElement('pre');
                                             sectionContent.className = 'code-block java';
-                                            // 限制显示的字符数以提高性能
-                                            let content = sections[sectionKey];
-                                            if (content.length > 1000) {
-                                                content = content.substring(0, 1000) + '... (内容已截断)';
-                                            }
+                                            // 设置默认显示15行高度，并添加展开/折叠功能
+                                            sectionContent.style.height = '250px'; // 约15行的高度
+                                            sectionContent.style.overflow = 'hidden';
+                                            sectionContent.style.position = 'relative';
                                             // 保持原始格式，包括缩进
-                                            sectionContent.textContent = content;
+                                            sectionContent.textContent = sections[sectionKey];
                                             
+                                            // 添加展开/折叠按钮
+                                            const toggleButton = document.createElement('button');
+                                            toggleButton.className = 'code-toggle-button';
+                                            toggleButton.textContent = '展开';
+                                            toggleButton.style.position = 'absolute';
+                                            toggleButton.style.bottom = '10px';
+                                            toggleButton.style.right = '10px';
+                                            toggleButton.style.padding = '5px 10px';
+                                            toggleButton.style.background = '#3498db';
+                                            toggleButton.style.color = 'white';
+                                            toggleButton.style.border = 'none';
+                                            toggleButton.style.borderRadius = '4px';
+                                            toggleButton.style.cursor = 'pointer';
+                                            
+                                            toggleButton.addEventListener('click', function() {
+                                                if (sectionContent.style.height === '250px') {
+                                                    sectionContent.style.height = 'auto';
+                                                    toggleButton.textContent = '折叠';
+                                                } else {
+                                                    sectionContent.style.height = '250px';
+                                                    toggleButton.textContent = '展开';
+                                                }
+                                            });
+                                            
+                                            sectionContent.appendChild(toggleButton);
                                             sectionDiv.appendChild(sectionTitle);
                                             sectionDiv.appendChild(sectionContent);
                                             sectionsContainer.appendChild(sectionDiv);
@@ -416,9 +440,38 @@ export class DataVisualizer {
                                 
                                 const sectionContent = document.createElement('pre');
                                 sectionContent.className = 'code-block java';
+                                // 设置默认显示15行高度，并添加展开/折叠功能
+                                sectionContent.style.height = '250px'; // 约15行的高度
+                                sectionContent.style.overflow = 'hidden';
+                                sectionContent.style.position = 'relative';
                                 // 保持原始格式，包括缩进
                                 sectionContent.textContent = sections[sectionKey];
                                 
+                                // 添加展开/折叠按钮
+                                const toggleButton = document.createElement('button');
+                                toggleButton.className = 'code-toggle-button';
+                                toggleButton.textContent = '展开';
+                                toggleButton.style.position = 'absolute';
+                                toggleButton.style.bottom = '10px';
+                                toggleButton.style.right = '10px';
+                                toggleButton.style.padding = '5px 10px';
+                                toggleButton.style.background = '#3498db';
+                                toggleButton.style.color = 'white';
+                                toggleButton.style.border = 'none';
+                                toggleButton.style.borderRadius = '4px';
+                                toggleButton.style.cursor = 'pointer';
+                                
+                                toggleButton.addEventListener('click', function() {
+                                    if (sectionContent.style.height === '250px') {
+                                        sectionContent.style.height = 'auto';
+                                        toggleButton.textContent = '折叠';
+                                    } else {
+                                        sectionContent.style.height = '250px';
+                                        toggleButton.textContent = '展开';
+                                    }
+                                });
+                                
+                                sectionContent.appendChild(toggleButton);
                                 sectionDiv.appendChild(sectionTitle);
                                 sectionDiv.appendChild(sectionContent);
                                 sectionsContainer.appendChild(sectionDiv);
