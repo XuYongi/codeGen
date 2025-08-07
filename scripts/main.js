@@ -37,6 +37,7 @@ let fileInput, filterSection, viewSection, dataSection, filterControls,
     viewControls, paginationControls, dataContainer, dataInfo, debugSection, debugInfo;
 let saveButton, saveToOriginalButton; // 添加保存按钮引用
 let filterToggle, toggleFilterButton; // 筛选项折叠相关元素
+let floatingTagPanel, togglePanelButton, manualTagSelect, manualRemarkInput, saveTagButton; // 悬浮窗面板元素
 
 // 全局变量
 let originalData = [];
@@ -87,6 +88,13 @@ function initializeApp() {
   filterToggle = document.getElementById('filter-toggle');
   toggleFilterButton = document.getElementById('toggle-filter-button');
   
+  // 获取悬浮窗面板元素
+  floatingTagPanel = document.getElementById('floating-tag-panel');
+  togglePanelButton = document.getElementById('toggle-panel');
+  manualTagSelect = document.getElementById('manual-tag');
+  manualRemarkInput = document.getElementById('manual-remark');
+  saveTagButton = document.getElementById('save-tag');
+  
   // 检查DOM元素是否存在
   if (!fileInput) {
     showDebugInfo('错误: 无法找到文件输入元素');
@@ -101,6 +109,15 @@ function initializeApp() {
   // 绑定筛选项折叠按钮事件
   if (toggleFilterButton) {
     toggleFilterButton.addEventListener('click', toggleFilterDisplay);
+  }
+  
+  // 绑定悬浮窗面板事件
+  if (togglePanelButton) {
+    togglePanelButton.addEventListener('click', toggleFloatingPanel);
+  }
+  
+  if (saveTagButton) {
+    saveTagButton.addEventListener('click', saveManualTagFromPanel);
   }
   
   showDebugInfo('应用初始化完成');
@@ -542,6 +559,12 @@ function displayCurrentData() {
       );
     }
     
+    // 更新悬浮窗面板标记信息
+    updateFloatingPanelTagInfo(rowData);
+    
+    // 显示悬浮窗面板
+    showFloatingPanel();
+    
     showDebugInfo('数据展示完成');
   } catch (error) {
     const errorMsg = '显示数据时出错: ' + error.message + '\n堆栈信息: ' + error.stack;
@@ -587,6 +610,77 @@ function displayDataInfo() {
     showDebugInfo(errorMsg);
     console.error('显示数据信息时出错:', error);
   }
+}
+
+// 更新悬浮窗面板标记信息
+function updateFloatingPanelTagInfo(rowData) {
+  if (!manualTagSelect || !manualRemarkInput) return;
+  
+  // 设置当前标签值
+  if (rowData.manualTag) {
+    manualTagSelect.value = rowData.manualTag;
+  } else {
+    manualTagSelect.value = '';
+  }
+  
+  // 设置当前备注值
+  if (rowData.manualRemark) {
+    manualRemarkInput.value = rowData.manualRemark;
+  } else {
+    manualRemarkInput.value = '';
+  }
+}
+
+// 显示悬浮窗面板
+function showFloatingPanel() {
+  if (floatingTagPanel) {
+    floatingTagPanel.classList.remove('hidden');
+  }
+}
+
+// 隐藏悬浮窗面板
+function hideFloatingPanel() {
+  if (floatingTagPanel) {
+    floatingTagPanel.classList.add('hidden');
+  }
+}
+
+// 切换悬浮窗面板显示状态（展开/收起）
+function toggleFloatingPanel() {
+  if (!floatingTagPanel || !togglePanelButton) return;
+  
+  const isCollapsed = floatingTagPanel.classList.contains('collapsed');
+  
+  if (isCollapsed) {
+    // 展开面板
+    floatingTagPanel.classList.remove('collapsed');
+    togglePanelButton.textContent = '◀';
+  } else {
+    // 收起面板
+    floatingTagPanel.classList.add('collapsed');
+    togglePanelButton.textContent = '▶';
+  }
+}
+
+// 从悬浮窗面板保存人工标记
+function saveManualTagFromPanel() {
+  if (!currentData || currentIndex >= currentData.length) {
+    alert('没有选中的数据行');
+    return;
+  }
+  
+  const rowData = currentData[currentIndex];
+  const tag = manualTagSelect ? manualTagSelect.value : '';
+  const remark = manualRemarkInput ? manualRemarkInput.value : '';
+  
+  // 更新数据对象
+  rowData.manualTag = tag;
+  rowData.manualRemark = remark;
+  
+  // 显示保存成功提示
+  alert('标记保存成功！');
+  
+  showDebugInfo('保存标记: ' + JSON.stringify({ rowIndex: currentIndex, tag, remark }));
 }
 
 // 页面加载完成后初始化应用

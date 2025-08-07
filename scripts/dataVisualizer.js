@@ -1,4 +1,4 @@
-import { ExcelProcessor } from './excelProcessor.js';
+import { ExcelProcessor } from './excelProcessor.js'; // 确保路径正确，如果文件在同一目录下则该路径正确
 
 /**
  * 数据可视化组件
@@ -115,38 +115,14 @@ export class DataVisualizer {
                                             
                                             const sectionContent = document.createElement('pre');
                                             sectionContent.className = 'code-block java';
-                                            // 设置默认显示15行高度，并添加展开/折叠功能
-                                            sectionContent.style.height = '250px'; // 约15行的高度
-                                            sectionContent.style.overflow = 'hidden';
-                                            sectionContent.style.position = 'relative';
+                                            // 限制显示的字符数以提高性能
+                                            let content = sections[sectionKey];
+                                            if (content.length > 1000) {
+                                                content = content.substring(0, 1000) + '... (内容已截断)';
+                                            }
                                             // 保持原始格式，包括缩进
-                                            sectionContent.textContent = sections[sectionKey];
+                                            sectionContent.textContent = content;
                                             
-                                            // 添加展开/折叠按钮
-                                            const toggleButton = document.createElement('button');
-                                            toggleButton.className = 'code-toggle-button';
-                                            toggleButton.textContent = '展开';
-                                            toggleButton.style.position = 'absolute';
-                                            toggleButton.style.bottom = '10px';
-                                            toggleButton.style.right = '10px';
-                                            toggleButton.style.padding = '5px 10px';
-                                            toggleButton.style.background = '#3498db';
-                                            toggleButton.style.color = 'white';
-                                            toggleButton.style.border = 'none';
-                                            toggleButton.style.borderRadius = '4px';
-                                            toggleButton.style.cursor = 'pointer';
-                                            
-                                            toggleButton.addEventListener('click', function() {
-                                                if (sectionContent.style.height === '250px') {
-                                                    sectionContent.style.height = 'auto';
-                                                    toggleButton.textContent = '折叠';
-                                                } else {
-                                                    sectionContent.style.height = '250px';
-                                                    toggleButton.textContent = '展开';
-                                                }
-                                            });
-                                            
-                                            sectionContent.appendChild(toggleButton);
                                             sectionDiv.appendChild(sectionTitle);
                                             sectionDiv.appendChild(sectionContent);
                                             sectionsContainer.appendChild(sectionDiv);
@@ -440,38 +416,9 @@ export class DataVisualizer {
                                 
                                 const sectionContent = document.createElement('pre');
                                 sectionContent.className = 'code-block java';
-                                // 设置默认显示15行高度，并添加展开/折叠功能
-                                sectionContent.style.height = '250px'; // 约15行的高度
-                                sectionContent.style.overflow = 'hidden';
-                                sectionContent.style.position = 'relative';
                                 // 保持原始格式，包括缩进
                                 sectionContent.textContent = sections[sectionKey];
                                 
-                                // 添加展开/折叠按钮
-                                const toggleButton = document.createElement('button');
-                                toggleButton.className = 'code-toggle-button';
-                                toggleButton.textContent = '展开';
-                                toggleButton.style.position = 'absolute';
-                                toggleButton.style.bottom = '10px';
-                                toggleButton.style.right = '10px';
-                                toggleButton.style.padding = '5px 10px';
-                                toggleButton.style.background = '#3498db';
-                                toggleButton.style.color = 'white';
-                                toggleButton.style.border = 'none';
-                                toggleButton.style.borderRadius = '4px';
-                                toggleButton.style.cursor = 'pointer';
-                                
-                                toggleButton.addEventListener('click', function() {
-                                    if (sectionContent.style.height === '250px') {
-                                        sectionContent.style.height = 'auto';
-                                        toggleButton.textContent = '折叠';
-                                    } else {
-                                        sectionContent.style.height = '250px';
-                                        toggleButton.textContent = '展开';
-                                    }
-                                });
-                                
-                                sectionContent.appendChild(toggleButton);
                                 sectionDiv.appendChild(sectionTitle);
                                 sectionDiv.appendChild(sectionContent);
                                 sectionsContainer.appendChild(sectionDiv);
@@ -503,80 +450,6 @@ export class DataVisualizer {
             promptItem.appendChild(promptValue);
             dataList.appendChild(promptItem);
             
-            // 添加人工标签和人工备注编辑区域
-            const editItem = document.createElement('div');
-            editItem.className = 'data-item';
-            
-            const editLabel = document.createElement('div');
-            editLabel.className = 'data-label';
-            editLabel.textContent = '人工标记';
-            
-            const editContent = document.createElement('div');
-            editContent.className = 'data-value';
-            
-            // 创建人工标签下拉框
-            const tagLabel = document.createElement('label');
-            tagLabel.textContent = '人工标签: ';
-            tagLabel.style.display = 'block';
-            tagLabel.style.marginBottom = '0.5rem';
-            
-            const tagSelect = document.createElement('select');
-            tagSelect.id = 'manual-tag';
-            tagSelect.style.marginRight = '1rem';
-            
-            const tagOptions = [
-                { value: '', label: '请选择标签' },
-                { value: 'correct', label: '正确输出' },
-                { value: 'incorrect', label: '错误输出' },
-                { value: 'doubtful', label: '存疑' }
-            ];
-            
-            tagOptions.forEach(option => {
-                const opt = document.createElement('option');
-                opt.value = option.value;
-                opt.textContent = option.label;
-                tagSelect.appendChild(opt);
-            });
-            
-            // 设置当前标签值
-            if (rowData.manualTag) {
-                tagSelect.value = rowData.manualTag;
-            }
-            
-            // 创建人工备注输入框
-            const remarkLabel = document.createElement('label');
-            remarkLabel.textContent = '人工备注: ';
-            remarkLabel.style.display = 'block';
-            remarkLabel.style.marginBottom = '0.5rem';
-            
-            const remarkInput = document.createElement('textarea');
-            remarkInput.id = 'manual-remark';
-            remarkInput.placeholder = '请输入备注信息';
-            remarkInput.style.width = '100%';
-            remarkInput.style.minHeight = '60px';
-            remarkInput.style.padding = '0.5rem';
-            
-            // 设置当前备注值
-            if (rowData.manualRemark) {
-                remarkInput.value = rowData.manualRemark;
-            }
-            
-            // 创建保存按钮
-            const saveButton = document.createElement('button');
-            saveButton.textContent = '保存标记';
-            saveButton.style.marginTop = '1rem';
-            saveButton.style.padding = '0.5rem 1rem';
-            saveButton.addEventListener('click', () => this.saveManualTag(rowData, tagSelect.value, remarkInput.value, rowIndex));
-            
-            editContent.appendChild(tagLabel);
-            editContent.appendChild(tagSelect);
-            editContent.appendChild(remarkLabel);
-            editContent.appendChild(remarkInput);
-            editContent.appendChild(saveButton);
-            
-            editItem.appendChild(editLabel);
-            editItem.appendChild(editContent);
-            dataList.appendChild(editItem);
             
             // 显示其他字段（包括原来的extra_params）
             const otherFieldsToggle = document.createElement('div');
@@ -596,29 +469,6 @@ export class DataVisualizer {
         }
     }
     
-    /**
-     * 保存人工标签和备注
-     * @param {Object} rowData - 当前行数据
-     * @param {string} tag - 人工标签
-     * @param {string} remark - 人工备注
-     * @param {number} rowIndex - 行索引
-     */
-    static saveManualTag(rowData, tag, remark, rowIndex) {
-        try {
-            // 更新数据对象
-            rowData.manualTag = tag;
-            rowData.manualRemark = remark;
-            
-            // 显示保存成功提示
-            alert('标记保存成功！');
-            
-            // 这里可以添加更多保存逻辑，例如保存到localStorage或通过API发送到服务器
-            console.log('保存标记:', { rowIndex: rowIndex, tag, remark });
-        } catch (error) {
-            console.error('保存标记时出错:', error);
-            alert('保存标记失败: ' + error.message);
-        }
-    }
     
     /**
      * 切换显示其他字段
@@ -632,7 +482,7 @@ export class DataVisualizer {
             const displayedKeys = displayedFields.map(f => f.key);
             
             // 查找未显示的字段（排除我们已经单独提取的字段）
-            const excludeKeys = ['prompt_sections']; // 不在"其他字段"中重复显示的字段
+            const excludeKeys = ['prompt_sections', 'manualTag', 'manualRemark']; // 不在"其他字段"中重复显示的字段
             const otherFields = Object.keys(rowData)
                 .filter(key => !displayedKeys.includes(key) && !excludeKeys.includes(key) && key !== '_rowIndex')
                 .map(key => ({ key, label: key }));

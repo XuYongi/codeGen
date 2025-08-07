@@ -3,56 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel数据可视化</title>
+    <title>代码续写用例可视化工具</title>
     <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
     <header>
-        <h1>Excel数据可视化工具</h1>
+        <h1>代码续写用例可视化工具</h1>
     </header>
     
-    <main>
-        <section id="upload-section">
-            <h2>上传Excel文件</h2>
-            <div class="upload-area">
-                <input type="file" id="file-input" accept=".xlsx, .xls">
-                <label for="file-input" class="file-label">
-                    选择Excel文件
-                </label>
-                <p>支持 .xlsx 和 .xls 格式</p>
-            </div>
-        </section>
-        
-        <section id="filter-section" class="hidden">
-            <h2>数据筛选</h2>
-            <div class="filter-controls-container">
-                <div id="filter-controls"></div>
-                <div id="filter-toggle" class="filter-toggle hidden">
-                    <button id="toggle-filter-button">显示更多筛选项</button>
+    <div class="main-container">
+        <main>
+            <section id="upload-section">
+                <h2>上传Excel文件</h2>
+                <div class="upload-area">
+                    <input type="file" id="file-input" accept=".xlsx, .xls">
+                    <label for="file-input" class="file-label">
+                        选择Excel文件
+                    </label>
+                    <p>支持 .xlsx 和 .xls 格式</p>
                 </div>
+            </section>
+            
+            <section id="filter-section" class="hidden">
+                <h2>数据筛选</h2>
+                <div class="filter-controls-container">
+                    <div id="filter-controls"></div>
+                    <div id="filter-toggle" class="filter-toggle hidden">
+                        <button id="toggle-filter-button">显示更多筛选项</button>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="view-section" class="hidden">
+                <h2>视图控制</h2>
+                <div id="view-controls"></div>
+            </section>
+            
+            <section id="data-section" class="hidden">
+                <h2>数据展示</h2>
+                <div id="data-info"></div>
+                <div id="pagination-controls"></div>
+                <div id="data-container"></div>
+            </section>
+            
+            <section id="debug-section" class="hidden">
+                <h2>调试信息</h2>
+                <div id="debug-info"></div>
+            </section>
+        </main>
+    </div>
+    
+    <!-- 悬浮标记面板 -->
+    <div id="floating-tag-panel" class="floating-panel collapsed">
+        <div class="panel-header">
+            <h3>人工标记</h3>
+            <button id="toggle-panel" class="toggle-panel-button">▶</button>
+        </div>
+        <div class="panel-content">
+            <div class="tag-section">
+                <label for="manual-tag">人工标签:</label>
+                <select id="manual-tag">
+                    <option value="">请选择标签</option>
+                    <option value="correct">正确输出</option>
+                    <option value="incorrect">错误输出</option>
+                    <option value="doubtful">存疑</option>
+                </select>
             </div>
-        </section>
-        
-        <section id="view-section" class="hidden">
-            <h2>视图控制</h2>
-            <div id="view-controls"></div>
-        </section>
-        
-        <section id="data-section" class="hidden">
-            <h2>数据展示</h2>
-            <div id="data-info"></div>
-            <div id="pagination-controls"></div>
-            <div id="data-container"></div>
-        </section>
-        
-        <section id="debug-section" class="hidden">
-            <h2>调试信息</h2>
-            <div id="debug-info"></div>
-        </section>
-    </main>
+            
+            <div class="remark-section">
+                <label for="manual-remark">人工备注:</label>
+                <textarea id="manual-remark" placeholder="请输入备注信息"></textarea>
+            </div>
+            
+            <button id="save-tag" class="save-button">保存标记</button>
+        </div>
+    </div>
     
     <footer>
-        <p>&copy; 2023 Excel数据可视化工具. 保留所有权利。</p>
+        <p>&copy; 2023 代码续写用例可视化工具. 保留所有权利。</p>
     </footer>
     
     <script src="scripts/main.js" type="module"></script>
