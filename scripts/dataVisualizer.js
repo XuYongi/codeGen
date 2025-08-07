@@ -709,9 +709,39 @@ export class DataVisualizer {
                 if (onPageChange) onPageChange(currentIndex + 1);
             };
             
+            // 添加页码输入和跳转功能
+            const pageInput = document.createElement('input');
+            pageInput.type = 'number';
+            pageInput.min = 1;
+            pageInput.max = total;
+            pageInput.value = currentIndex + 1;
+            pageInput.style.width = '60px';
+            pageInput.style.margin = '0 5px';
+            
+            const goButton = document.createElement('button');
+            goButton.textContent = '跳转';
+            goButton.onclick = () => {
+                const pageNumber = parseInt(pageInput.value);
+                if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= total) {
+                    if (onPageChange) onPageChange(pageNumber - 1);
+                } else {
+                    alert(`请输入有效的页码 (1-${total})`);
+                }
+            };
+            
+            // 添加回车键支持
+            pageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    goButton.click();
+                }
+            });
+            
             pagination.appendChild(prevButton);
             pagination.appendChild(pageInfo);
             pagination.appendChild(nextButton);
+            pagination.appendChild(document.createTextNode(' 跳转到:'));
+            pagination.appendChild(pageInput);
+            pagination.appendChild(goButton);
             container.appendChild(pagination);
         } catch (error) {
             console.error('创建分页控件时出错:', error);
